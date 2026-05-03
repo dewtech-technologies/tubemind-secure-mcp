@@ -1,0 +1,33 @@
+# Ambiente
+.env
+.env.local
+.env.*.local
+
+# Build
+dist/
+*.js.map
+
+# Dependências
+node_modules/
+.pnpm-store/
+
+# Logs & Tokens (NUNCA commitar)
+logs/
+*.log
+tokens/
+*.token
+*.key
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testes
+coverage/
+.vitest/

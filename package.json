@@ -1,0 +1,39 @@
+{
+  "name": "tubemind-secure-mcp",
+  "version": "0.1.0",
+  "description": "YouTube intelligence, powered by Claude. Secure by design.",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "tubemind-secure-mcp": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "audit:security": "pnpm audit --audit-level=high",
+    "lint": "eslint src --ext .ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.10.2",
+    "googleapis": "144.0.0",
+    "zod": "3.25.28"
+  },
+  "devDependencies": {
+    "@types/node": "22.10.0",
+    "@typescript-eslint/eslint-plugin": "8.18.0",
+    "@typescript-eslint/parser": "8.18.0",
+    "@vitest/coverage-v8": "2.1.8",
+    "eslint": "9.16.0",
+    "tsx": "4.19.2",
+    "typescript": "5.7.3",
+    "vitest": "2.1.8"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  }
+}
