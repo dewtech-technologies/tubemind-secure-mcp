@@ -15,6 +15,7 @@
     "test": "vitest",
     "test:coverage": "vitest run --coverage",
     "audit:security": "pnpm audit --audit-level=high",
+    "auth": "tsx --env-file=.env src/auth-server.ts",
     "lint": "eslint src --ext .ts"
   },
   "dependencies": {
