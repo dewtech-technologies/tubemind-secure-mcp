@@ -54,6 +54,9 @@ export const SuggestTagsSchema = z.object({
 export const ListChannelVideosSchema = z.object({
   maxResults: z.number().int().min(1).max(50).default(20),
   order: z.enum(['date', 'viewCount', 'rating', 'title']).default('date'),
+  channelId: z.string()
+    .regex(/^UC[a-zA-Z0-9_-]{22}$/, 'Channel ID inválido (deve começar com UC)')
+    .optional(),
 })
 
 // ─── Analytics ────────────────────────────────────────────────────────────────
@@ -75,6 +78,28 @@ export const GetChannelAnalyticsSchema = z.object({
   { message: 'startDate deve ser anterior ou igual a endDate' }
 )
 
+// ─── Heuristics ──────────────────────────────────────────────────────────────
+
+export const EstimateKeywordDifficultySchema = z.object({
+  keyword: SafeString(200),
+  regionCode: z.enum(['BR', 'US', 'PT', 'ES', 'AR']).default('BR'),
+  maxVideos: z.number().int().min(5).max(15).default(10),
+})
+
+export const AnalyzeTitlePatternsSchema = z.object({
+  niche: SafeString(200),
+  regionCode: z.enum(['BR', 'US', 'PT', 'ES', 'AR']).default('BR'),
+  videoCount: z.number().int().min(10).max(50).default(30),
+})
+
+export const DetectContentGapsSchema = z.object({
+  niche: SafeString(200),
+  regionCode: z.enum(['BR', 'US', 'PT', 'ES', 'AR']).default('BR'),
+  yourChannelId: z.string()
+    .regex(/^UC[a-zA-Z0-9_-]{22}$/, 'Channel ID inválido')
+    .optional(),
+})
+
 // ─── Competitor ───────────────────────────────────────────────────────────────
 
 export const GetCompetitorVideosSchema = z.object({
@@ -93,3 +118,60 @@ export type SuggestTagsInput = z.infer<typeof SuggestTagsSchema>
 export type ListChannelVideosInput = z.infer<typeof ListChannelVideosSchema>
 export type GetChannelAnalyticsInput = z.infer<typeof GetChannelAnalyticsSchema>
 export type GetCompetitorVideosInput = z.infer<typeof GetCompetitorVideosSchema>
+export type EstimateKeywordDifficultyInput = z.infer<typeof EstimateKeywordDifficultySchema>
+export type AnalyzeTitlePatternsInput = z.infer<typeof AnalyzeTitlePatternsSchema>
+export type DetectContentGapsInput = z.infer<typeof DetectContentGapsSchema>
+
+// ─── New Tools ────────────────────────────────────────────────────────────────
+
+export const ScoreBestPublishWindowSchema = z.object({
+  videoCount: z.number().int().min(10).max(50).default(30),
+})
+
+export const BenchmarkChannelSchema = z.object({
+  competitorChannelIds: z.array(
+    z.string().regex(/^UC[a-zA-Z0-9_-]{22}$/, 'Channel ID inválido'),
+  ).min(1).max(3),
+})
+
+export const EstimateCtrPotentialSchema = z.object({
+  titles: z.array(z.string().min(1).max(100)).min(1).max(5),
+  niche: SafeString(200),
+  regionCode: z.enum(['BR', 'US', 'PT', 'ES', 'AR']).default('BR'),
+})
+
+export const SuggestHookAnglesSchema = z.object({
+  videoTopic: SafeString(200),
+  niche: SafeString(200),
+  targetAudience: SafeString(200).optional(),
+  regionCode: z.enum(['BR', 'US', 'PT', 'ES', 'AR']).default('BR'),
+})
+
+export const FindTrendingKeywordsSchema = z.object({
+  niche: SafeString(200),
+  regionCode: z.enum(['BR', 'US', 'PT', 'ES', 'AR']).default('BR'),
+  maxKeywords: z.number().int().min(5).max(15).default(10),
+})
+
+export const AnalyzeRetentionSignalsSchema = z.object({
+  niche: SafeString(200),
+  regionCode: z.enum(['BR', 'US', 'PT', 'ES', 'AR']).default('BR'),
+  videoCount: z.number().int().min(10).max(20).default(20),
+  minViews: z.number().int().min(0).default(10000),
+})
+
+export const GenerateContentCalendarSchema = z.object({
+  niche: SafeString(200),
+  periodDays: z.number().int().min(14).max(30).default(30),
+  postsPerWeek: z.number().int().min(1).max(3).default(2),
+  includeShorts: z.boolean().default(true),
+  regionCode: z.enum(['BR', 'US', 'PT', 'ES', 'AR']).default('BR'),
+})
+
+export type ScoreBestPublishWindowInput = z.infer<typeof ScoreBestPublishWindowSchema>
+export type BenchmarkChannelInput = z.infer<typeof BenchmarkChannelSchema>
+export type EstimateCtrPotentialInput = z.infer<typeof EstimateCtrPotentialSchema>
+export type SuggestHookAnglesInput = z.infer<typeof SuggestHookAnglesSchema>
+export type FindTrendingKeywordsInput = z.infer<typeof FindTrendingKeywordsSchema>
+export type AnalyzeRetentionSignalsInput = z.infer<typeof AnalyzeRetentionSignalsSchema>
+export type GenerateContentCalendarInput = z.infer<typeof GenerateContentCalendarSchema>

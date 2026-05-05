@@ -30,6 +30,50 @@ import {
   listChannelVideos,
 } from './tools/video.tool.js'
 
+// Tools — Analytics
+import {
+  getChannelAnalyticsDefinition,
+  getChannelAnalytics,
+  scoreBestPublishWindowDefinition,
+  scoreBestPublishWindow,
+} from './tools/analytics.tool.js'
+
+// Tools — Benchmark
+import {
+  benchmarkChannelDefinition,
+  benchmarkChannel,
+} from './tools/benchmark.tool.js'
+
+// Tools — Heuristics Advanced
+import {
+  estimateCtrPotentialDefinition,
+  estimateCtrPotential,
+  suggestHookAnglesDefinition,
+  suggestHookAngles,
+  findTrendingKeywordsDefinition,
+  findTrendingKeywords,
+  analyzeRetentionSignalsDefinition,
+  analyzeRetentionSignals,
+  generateContentCalendarDefinition,
+  generateContentCalendar,
+} from './tools/heuristic-advanced.tool.js'
+
+// Tools — Competitor
+import {
+  getCompetitorVideosDefinition,
+  getCompetitorVideos,
+} from './tools/competitor.tool.js'
+
+// Tools — Heuristics
+import {
+  estimateKeywordDifficultyDefinition,
+  estimateKeywordDifficulty,
+  analyzeTitlePatternsDefinition,
+  analyzeTitlePatterns,
+  detectContentGapsDefinition,
+  detectContentGaps,
+} from './tools/heuristic.tool.js'
+
 // ─── Server ───────────────────────────────────────────────────────────────────
 
 const server = new Server(
@@ -52,24 +96,34 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
     getVideoTagsDefinition,
     updateVideoMetadataDefinition,
     listChannelVideosDefinition,
+    getChannelAnalyticsDefinition,
+    getCompetitorVideosDefinition,
+    estimateKeywordDifficultyDefinition,
+    analyzeTitlePatternsDefinition,
+    detectContentGapsDefinition,
+    scoreBestPublishWindowDefinition,
+    benchmarkChannelDefinition,
+    estimateCtrPotentialDefinition,
+    suggestHookAnglesDefinition,
+    findTrendingKeywordsDefinition,
+    analyzeRetentionSignalsDefinition,
+    generateContentCalendarDefinition,
   ],
 }))
 
 // ─── Call Tool ────────────────────────────────────────────────────────────────
-
-const USER_ID = 'default' // Em produção: identificar usuário via sessão
 
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params
 
   let accessToken: string
   try {
-    accessToken = getAccessToken(USER_ID)
+    accessToken = await getAccessToken()
   } catch (err) {
     return {
       content: [{
         type: 'text',
-        text: `❌ Autenticação necessária: ${err instanceof Error ? err.message : 'erro desconhecido'}\n\nExecute o fluxo OAuth para conectar seu canal YouTube.`,
+        text: `❌ Autenticação necessária: ${err instanceof Error ? err.message : 'erro desconhecido'}\n\nExecute "pnpm auth" para conectar seu canal YouTube.`,
       }],
       isError: true,
     }
@@ -96,6 +150,42 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         break
       case 'list_channel_videos':
         result = await listChannelVideos(args, accessToken)
+        break
+      case 'get_channel_analytics':
+        result = await getChannelAnalytics(args, accessToken)
+        break
+      case 'get_competitor_videos':
+        result = await getCompetitorVideos(args, accessToken)
+        break
+      case 'estimate_keyword_difficulty':
+        result = await estimateKeywordDifficulty(args, accessToken)
+        break
+      case 'analyze_title_patterns':
+        result = await analyzeTitlePatterns(args, accessToken)
+        break
+      case 'detect_content_gaps':
+        result = await detectContentGaps(args, accessToken)
+        break
+      case 'score_best_publish_window':
+        result = await scoreBestPublishWindow(args, accessToken)
+        break
+      case 'benchmark_channel':
+        result = await benchmarkChannel(args, accessToken)
+        break
+      case 'estimate_ctr_potential':
+        result = await estimateCtrPotential(args, accessToken)
+        break
+      case 'suggest_hook_angles':
+        result = await suggestHookAngles(args, accessToken)
+        break
+      case 'find_trending_keywords':
+        result = await findTrendingKeywords(args, accessToken)
+        break
+      case 'analyze_retention_signals':
+        result = await analyzeRetentionSignals(args, accessToken)
+        break
+      case 'generate_content_calendar':
+        result = await generateContentCalendar(args, accessToken)
         break
       default:
         return {

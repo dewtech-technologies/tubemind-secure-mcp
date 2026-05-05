@@ -81,13 +81,14 @@ export async function listChannelVideos(
   client: YouTubeClient,
   maxResults: number,
   order: string,
+  channelIdParam?: string,
 ): Promise<youtube_v3.Schema$Video[]> {
-  const channelRes = await client.channels.list({
-    part: ['id'],
-    mine: true,
-  })
-  const channelId = channelRes.data.items?.[0]?.id
-  if (!channelId) throw new Error('Canal não encontrado')
+  let channelId = channelIdParam
+
+  if (!channelId) {
+    // Sem channelId → usa YOUTUBE_CHANNEL_ID (env) ou mine: true como fallback
+    channelId = await getOwnChannelId(client)
+  }
 
   const safeOrder = (['date', 'rating', 'relevance', 'title', 'viewCount'] as SearchOrder[])
     .includes(order as SearchOrder)
@@ -114,4 +115,65 @@ export async function listChannelVideos(
   })
 
   return videosRes.data.items ?? []
+}
+
+// ─── Competitor ───────────────────────────────────────────────────────────────
+
+export async function getCompetitorChannelVideos(
+  client: YouTubeClient,
+  channelId: string,
+  maxResults: number,
+  order: 'date' | 'viewCount' | 'rating',
+): Promise<youtube_v3.Schema$Video[]> {
+  const searchRes = await client.search.list({
+    part: ['id'],
+    channelId,
+    maxResults,
+    order,
+    type: ['video'],
+  })
+
+  const videoIds = (searchRes.data.items ?? [])
+    .map(i => i.id?.videoId)
+    .filter((id): id is string => !!id)
+
+  if (videoIds.length === 0) return []
+
+  const videosRes = await client.videos.list({
+    part: ['snippet', 'statistics', 'contentDetails'],
+    id: videoIds,
+  })
+
+  return videosRes.data.items ?? []
+}
+
+// ─── Own channel ID (respects Brand Account via env var) ─────────────────────
+
+/**
+ * Retorna o Channel ID do canal principal.
+ * Prioridade: YOUTUBE_CHANNEL_ID (env) → channels.list(mine: true)
+ * Use sempre que precisar do "meu canal" para evitar pegar canal pessoal
+ * em vez de Brand Account.
+ */
+export async function getOwnChannelId(client: YouTubeClient): Promise<string> {
+  const envChannelId = process.env['YOUTUBE_CHANNEL_ID']
+  if (envChannelId) return envChannelId
+
+  const res = await client.channels.list({ part: ['id'], mine: true })
+  const id = res.data.items?.[0]?.id
+  if (!id) throw new Error('Canal não encontrado para a conta autenticada.')
+  return id
+}
+
+// ─── Channel stats (for heuristics) ──────────────────────────────────────────
+
+export async function getChannelStats(
+  client: YouTubeClient,
+  channelId: string,
+): Promise<youtube_v3.Schema$ChannelStatistics | null> {
+  const res = await client.channels.list({
+    part: ['statistics'],
+    id: [channelId],
+  })
+  return res.data.items?.[0]?.statistics ?? null
 }

@@ -1,24 +1,23 @@
 import { google } from 'googleapis'
-import { randomBytes } from 'crypto'
-import { encrypt, decrypt } from '../security/crypto.service.js'
+import { readFile, writeFile, mkdir } from 'fs/promises'
+import { dirname, resolve } from 'path'
+import { fileURLToPath } from 'url'
 import { assertAllowedDomain } from '../security/ssrf-guard.service.js'
 
 assertAllowedDomain('accounts.google.com')
 assertAllowedDomain('oauth2.googleapis.com')
 
-// A07 — OAuth2 PKCE com state para CSRF protection
-// A02 — Tokens armazenados criptografados
+// Caminho absoluto relativo à raiz do projeto (2 níveis acima de src/services/)
+const PROJECT_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..')
+const TOKEN_PATH = resolve(PROJECT_ROOT, 'tokens', 'youtube.token.json')
 
-const SCOPES = [
-  'https://www.googleapis.com/auth/youtube.readonly',
-  'https://www.googleapis.com/auth/youtube.upload',
-  'https://www.googleapis.com/auth/youtube',
-  'https://www.googleapis.com/auth/yt-analytics.readonly',
-]
-
-// Storage em memória (em produção: substituir por store persistente criptografado)
-const tokenStore = new Map<string, string>() // userId → encrypted token JSON
-const stateStore = new Map<string, number>()  // state → expiry timestamp
+interface TokenData {
+  access_token?: string | null
+  refresh_token?: string | null
+  expiry_date?: number | null
+  token_type?: string | null
+  scope?: string
+}
 
 function getOAuthClient() {
   return new google.auth.OAuth2(
@@ -28,60 +27,60 @@ function getOAuthClient() {
   )
 }
 
-export function generateAuthUrl(): { url: string; state: string } {
-  const oauth2Client = getOAuthClient()
-
-  // A07 — state aleatório para CSRF
-  const state = randomBytes(32).toString('hex')
-  stateStore.set(state, Date.now() + 10 * 60 * 1000) // expira em 10 min
-
-  const url = oauth2Client.generateAuthUrl({
-    access_type: 'offline',
-    scope: SCOPES,
-    state,
-    prompt: 'consent',
-  })
-
-  return { url, state }
-}
-
-export async function handleCallback(
-  code: string,
-  state: string,
-  userId: string,
-): Promise<void> {
-  // Valida state (CSRF protection)
-  const expiry = stateStore.get(state)
-  if (!expiry || Date.now() > expiry) {
-    stateStore.delete(state)
-    throw new Error('[oauth] State inválido ou expirado.')
+async function loadTokens(): Promise<TokenData> {
+  try {
+    const raw = await readFile(TOKEN_PATH, 'utf-8')
+    return JSON.parse(raw) as TokenData
+  } catch {
+    throw new Error(
+      '[oauth] Token não encontrado. Execute "pnpm auth" para autenticar primeiro.',
+    )
   }
-  stateStore.delete(state)
-
-  const oauth2Client = getOAuthClient()
-  const { tokens } = await oauth2Client.getToken(code)
-
-  // A02 — Armazena token criptografado
-  tokenStore.set(userId, encrypt(JSON.stringify(tokens)))
 }
 
-export function getAccessToken(userId: string): string {
-  const encrypted = tokenStore.get(userId)
-  if (!encrypted) throw new Error('[oauth] Usuário não autenticado. Execute /auth primeiro.')
+async function saveTokens(tokens: TokenData): Promise<void> {
+  await mkdir(dirname(TOKEN_PATH), { recursive: true })
+  await writeFile(TOKEN_PATH, JSON.stringify(tokens, null, 2), 'utf-8')
+}
 
-  const tokens = JSON.parse(decrypt(encrypted)) as { access_token?: string; expiry_date?: number }
+export async function getAccessToken(): Promise<string> {
+  const tokens = await loadTokens()
 
   if (!tokens.access_token) {
-    throw new Error('[oauth] Token de acesso inválido.')
+    throw new Error('[oauth] Token de acesso inválido. Execute "pnpm auth" novamente.')
   }
 
-  if (tokens.expiry_date && Date.now() > tokens.expiry_date) {
-    throw new Error('[oauth] Token expirado. Execute /auth novamente.')
+  // Token ainda válido (com 5 min de margem)
+  if (tokens.expiry_date && Date.now() < tokens.expiry_date - 300_000) {
+    return tokens.access_token as string
   }
 
-  return tokens.access_token
+  // Token expirado — tenta renovar com refresh_token
+  if (!tokens.refresh_token) {
+    throw new Error('[oauth] Refresh token não encontrado. Execute "pnpm auth" novamente.')
+  }
+
+  console.error('[oauth] Token expirado, renovando...')
+
+  const oauth2Client = getOAuthClient()
+  oauth2Client.setCredentials(tokens)
+
+  const { credentials } = await oauth2Client.refreshAccessToken()
+
+  // Salva tokens atualizados
+  const updated: TokenData = { ...tokens, ...credentials }
+  await saveTokens(updated)
+
+  console.error('[oauth] Token renovado com sucesso ✅')
+
+  return updated.access_token!
 }
 
-export function revokeToken(userId: string): void {
-  tokenStore.delete(userId)
+export async function revokeToken(): Promise<void> {
+  const tokens = await loadTokens()
+  if (tokens.access_token) {
+    const oauth2Client = getOAuthClient()
+    await oauth2Client.revokeToken(tokens.access_token)
+  }
+  await saveTokens({})
 }

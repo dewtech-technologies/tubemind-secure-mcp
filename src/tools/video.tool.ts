@@ -6,6 +6,7 @@ import {
 import {
   getYouTubeClient,
   getVideoById,
+  getOwnChannelId,
   updateVideoMetadata as updateMetadataService,
   listChannelVideos as listVideosService,
 } from '../services/youtube.service.js'
@@ -79,9 +80,8 @@ export async function updateVideoMetadata(rawInput: unknown, accessToken: string
     const input = UpdateVideoMetadataSchema.parse(rawInput)
     const client = getYouTubeClient(accessToken)
 
-    // Verifica se o vídeo pertence ao canal autenticado
-    const channelRes = await client.channels.list({ part: ['id'], mine: true })
-    const myChannelId = channelRes.data.items?.[0]?.id
+    // Verifica se o vídeo pertence ao canal autenticado (suporta Brand Accounts via env)
+    const myChannelId = await getOwnChannelId(client)
 
     const video = await getVideoById(client, input.videoId)
     if (!video) throw new Error(`Vídeo "${input.videoId}" não encontrado.`)
@@ -114,12 +114,13 @@ export async function updateVideoMetadata(rawInput: unknown, accessToken: string
 
 export const listChannelVideosDefinition = {
   name: 'list_channel_videos',
-  description: 'Lista os vídeos do canal autenticado com título, views, likes e data de publicação.',
+  description: 'Lista os vídeos de um canal YouTube com título, views, likes e data de publicação. Use channelId para Brand Accounts (ex: canal @dewtech = UC_x33Gz4LvnOZuC_4v7Qucg). Sem channelId usa o canal da conta autenticada.',
   inputSchema: {
     type: 'object',
     properties: {
       maxResults: { type: 'number', description: 'Número de vídeos (1-50)', default: 20 },
       order: { type: 'string', description: 'Ordenação: date, viewCount, rating, title', default: 'date' },
+      channelId: { type: 'string', description: 'Channel ID para Brand Accounts (começa com UC). Ex: UC_x33Gz4LvnOZuC_4v7Qucg para @dewtech' },
     },
   },
 } as const
@@ -130,7 +131,7 @@ export async function listChannelVideos(rawInput: unknown, accessToken: string):
 
     const input = ListChannelVideosSchema.parse(rawInput ?? {})
     const client = getYouTubeClient(accessToken)
-    const videos = await listVideosService(client, input.maxResults, input.order)
+    const videos = await listVideosService(client, input.maxResults, input.order, input.channelId)
 
     if (videos.length === 0) return 'Nenhum vídeo encontrado no canal.'
 

@@ -16,6 +16,16 @@ const LIMITS: Record<string, number> = {
   list_channel_videos: 20,
   get_channel_analytics: 10,
   get_competitor_videos: 10,
+  estimate_keyword_difficulty: 8,
+  analyze_title_patterns: 5,
+  detect_content_gaps: 3,
+  score_best_publish_window: 5,
+  benchmark_channel: 3,
+  estimate_ctr_potential: 20,
+  suggest_hook_angles: 5,
+  find_trending_keywords: 3,
+  analyze_retention_signals: 3,
+  generate_content_calendar: 2,
   default: parseInt(process.env['RATE_LIMIT_PER_MINUTE'] ?? '60', 10),
 }
 
