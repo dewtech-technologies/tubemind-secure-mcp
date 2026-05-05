@@ -113,8 +113,10 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
 
 // ─── Call Tool ────────────────────────────────────────────────────────────────
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore — SDK 1.26 deep type instantiation (TS2589); runtime is safe
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
-  const { name, arguments: args } = request.params
+  const { name, arguments: args } = (request as { params: { name: string; arguments?: Record<string, unknown> } }).params
 
   let accessToken: string
   try {
