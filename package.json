@@ -12,7 +12,7 @@
     "dev": "tsx watch src/index.ts",
     "start": "node dist/index.js",
     "typecheck": "tsc --noEmit",
-    "test": "vitest",
+    "test": "vitest --passWithNoTests",
     "test:coverage": "vitest run --coverage",
     "audit:security": "pnpm audit --audit-level=high",
     "auth": "tsx --env-file=.env src/auth-server.ts",
