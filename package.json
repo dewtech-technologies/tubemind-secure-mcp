@@ -1,6 +1,6 @@
 {
   "name": "tubemind-secure-mcp",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Secure Model Context Protocol server for YouTube intelligence — 18 tools (search, analytics, benchmark, heuristics, competitor research) powered by YouTube Data API v3 + Analytics API, OAuth2 (Brand Account support), AES-256-GCM token encryption, OWASP Top 10 controls.",
   "type": "module",
   "main": "dist/index.js",
@@ -82,5 +82,6 @@
       "esbuild": ">=0.25.0",
       "vite": ">=6.4.2"
     }
-  }
+  },
+  "packageManager": "pnpm@9.15.4+sha512.b2dc20e2fc72b3e18848459b37359a32064663e5627a51e4c74b2c29dd8e8e0491483c3abb40789cfd578bf362fb6ba8261b05f0387d76792ed6e23ea3b1b6a0"
 }

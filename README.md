@@ -13,6 +13,22 @@
   <a href="https://modelcontextprotocol.io"><img src="https://img.shields.io/badge/MCP-1.26-5A67D8?style=flat-square" alt="MCP SDK"/></a>
 </p>
 
+<p align="center">
+  <b>📦 18 tools · 🔐 OAuth2 + AES-256-GCM · 🛡️ OWASP Top 10 · 🤖 Claude Desktop ready</b>
+</p>
+
+---
+
+## 🎯 Why tubemind-secure-mcp?
+
+> Turn Claude into a **YouTube growth strategist** — without ever handing it your raw OAuth tokens.
+
+- ⚡ **Plug-and-play with Claude Desktop** — drop one config block, get 18 production tools.
+- 🔐 **Secure by default** — tokens encrypted at rest (AES-256-GCM), SSRF guard, rate limiting, audit log, Zod-validated inputs. **OWASP Top 10** mapped end-to-end.
+- 📊 **Real data, not scraping** — official YouTube Data API v3 + YouTube Analytics API. Brand Accounts supported.
+- 🧠 **Beyond raw API** — built-in heuristics for CTR, retention, keyword difficulty, content gaps, hook angles and N-day content calendars.
+- 🪶 **Tiny footprint** — 3 runtime deps (`@modelcontextprotocol/sdk`, `googleapis`, `zod`). Node ≥ 20.
+
 ---
 
 ## ✨ Overview

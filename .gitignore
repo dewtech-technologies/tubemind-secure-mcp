@@ -31,3 +31,7 @@ Thumbs.db
 # Testes
 coverage/
 .vitest/
+
+# MCP publisher binary (baixar localmente)
+mcp-publisher.exe
+mcp-publisher

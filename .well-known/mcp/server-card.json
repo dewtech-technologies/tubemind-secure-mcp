@@ -1,0 +1,57 @@
+{
+  "name": "tubemind-secure-mcp",
+  "version": "0.1.1",
+  "description": "Secure MCP server for YouTube intelligence — 18 tools across search, video, analytics, benchmark, heuristics and competitor research. Powered by YouTube Data API v3 + Analytics API with OAuth2 (Brand Account support), AES-256-GCM token encryption and OWASP Top 10 controls.",
+  "tools": [
+    { "name": "search_trending_topics", "description": "Discover trending topics by region/category" },
+    { "name": "get_keyword_stats",      "description": "Search-volume signals for keywords" },
+    { "name": "suggest_tags",           "description": "Tag recommendations from a seed keyword" },
+    { "name": "get_video_tags",         "description": "Read tags from a video" },
+    { "name": "update_video_metadata",  "description": "Update title/description/tags (write scope)" },
+    { "name": "list_channel_videos",    "description": "Paginate channel uploads" },
+    { "name": "get_channel_analytics",  "description": "Views, watch time, retention via Analytics API" },
+    { "name": "score_best_publish_window", "description": "Best day/hour heatmap to publish" },
+    { "name": "benchmark_channel",      "description": "Compare a channel against peers" },
+    { "name": "estimate_keyword_difficulty", "description": "Difficulty score 0-100" },
+    { "name": "analyze_title_patterns", "description": "Common title patterns in top videos" },
+    { "name": "detect_content_gaps",    "description": "Topics competitors cover that you don't" },
+    { "name": "estimate_ctr_potential", "description": "CTR estimate from title/thumbnail signals" },
+    { "name": "suggest_hook_angles",    "description": "Hook angles for a topic" },
+    { "name": "find_trending_keywords", "description": "Rising-momentum keywords" },
+    { "name": "analyze_retention_signals", "description": "Retention-shaping factors" },
+    { "name": "generate_content_calendar", "description": "N-day content plan" },
+    { "name": "get_competitor_videos",  "description": "Top videos from a competitor channel" }
+  ],
+  "configSchema": {
+    "type": "object",
+    "required": ["youtubeClientId", "youtubeClientSecret", "tokenEncryptionKey"],
+    "properties": {
+      "youtubeClientId": {
+        "type": "string",
+        "title": "YouTube OAuth2 Client ID",
+        "description": "Google OAuth2 Client ID with YouTube Data API v3 + Analytics API enabled",
+        "x-sensitive": false
+      },
+      "youtubeClientSecret": {
+        "type": "string",
+        "title": "YouTube OAuth2 Client Secret",
+        "x-sensitive": true
+      },
+      "youtubeRedirectUri": {
+        "type": "string",
+        "title": "OAuth2 Redirect URI",
+        "default": "http://localhost:4000/oauth/callback"
+      },
+      "tokenEncryptionKey": {
+        "type": "string",
+        "title": "Token Encryption Key (64-char hex)",
+        "description": "AES-256-GCM key for token encryption at rest",
+        "x-sensitive": true
+      },
+      "rateLimitPerMinute": { "type": "number", "default": 60 },
+      "requestTimeoutMs":   { "type": "number", "default": 10000 },
+      "auditLogPath":       { "type": "string", "default": "./logs/audit.log" },
+      "nodeEnv":            { "type": "string", "enum": ["production", "development"], "default": "production" }
+    }
+  }
+}

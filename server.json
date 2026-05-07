@@ -1,74 +1,75 @@
 {
-  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-09-29/server.schema.json",
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.dewtech-technologies/tubemind-secure-mcp",
   "description": "Secure MCP server for YouTube intelligence — 18 tools (search, analytics, benchmark, heuristics, competitor research) powered by YouTube Data API v3 + Analytics API, OAuth2 (Brand Account support), AES-256-GCM token encryption, OWASP Top 10 controls.",
-  "version": "0.1.0",
   "repository": {
     "url": "https://github.com/dewtech-technologies/tubemind-secure-mcp",
     "source": "github"
   },
-  "websiteUrl": "https://github.com/dewtech-technologies/tubemind-secure-mcp#readme",
+  "version": "0.1.1",
   "packages": [
     {
       "registryType": "npm",
-      "registryBaseUrl": "https://registry.npmjs.org",
       "identifier": "tubemind-secure-mcp",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "transport": {
         "type": "stdio"
       },
       "environmentVariables": [
         {
           "name": "YOUTUBE_CLIENT_ID",
-          "description": "Google OAuth2 Client ID for the YouTube Data + Analytics APIs",
+          "description": "Google OAuth2 Client ID for YouTube Data API v3 + Analytics API",
           "isRequired": true,
-          "isSecret": false
+          "isSecret": false,
+          "format": "string"
         },
         {
           "name": "YOUTUBE_CLIENT_SECRET",
           "description": "Google OAuth2 Client Secret",
           "isRequired": true,
-          "isSecret": true
+          "isSecret": true,
+          "format": "string"
         },
         {
           "name": "YOUTUBE_REDIRECT_URI",
-          "description": "OAuth2 redirect URI (default: http://localhost:4000/oauth/callback)",
-          "isRequired": true,
-          "isSecret": false,
+          "description": "OAuth2 redirect URI (must match Google Cloud Console)",
+          "isRequired": false,
+          "format": "string",
           "default": "http://localhost:4000/oauth/callback"
         },
         {
           "name": "TOKEN_ENCRYPTION_KEY",
           "description": "64-char hex key for AES-256-GCM token encryption at rest. Generate with: openssl rand -hex 32",
           "isRequired": true,
-          "isSecret": true
+          "isSecret": true,
+          "format": "string"
         },
         {
           "name": "RATE_LIMIT_PER_MINUTE",
-          "description": "Max tool invocations per minute (default 60)",
+          "description": "Max tool invocations per minute",
           "isRequired": false,
-          "isSecret": false,
+          "format": "string",
           "default": "60"
         },
         {
           "name": "REQUEST_TIMEOUT_MS",
-          "description": "HTTP request timeout in ms (default 10000)",
+          "description": "HTTP request timeout (ms)",
           "isRequired": false,
-          "isSecret": false,
+          "format": "string",
           "default": "10000"
         },
         {
           "name": "AUDIT_LOG_PATH",
           "description": "Path to the audit log file",
           "isRequired": false,
-          "isSecret": false,
+          "format": "string",
           "default": "./logs/audit.log"
         },
         {
           "name": "NODE_ENV",
           "description": "production | development",
           "isRequired": false,
-          "isSecret": false,
+          "format": "string",
           "default": "production"
         }
       ]
