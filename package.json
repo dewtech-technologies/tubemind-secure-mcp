@@ -1,11 +1,50 @@
 {
   "name": "tubemind-secure-mcp",
   "version": "0.1.0",
-  "description": "YouTube intelligence, powered by Claude. Secure by design.",
+  "description": "Secure Model Context Protocol server for YouTube intelligence — 18 tools (search, analytics, benchmark, heuristics, competitor research) powered by YouTube Data API v3 + Analytics API, OAuth2 (Brand Account support), AES-256-GCM token encryption, OWASP Top 10 controls.",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
     "tubemind-secure-mcp": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "SECURITY.md",
+    "README.md",
+    ".env.example"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "youtube",
+    "youtube-api",
+    "youtube-analytics",
+    "claude",
+    "anthropic",
+    "ai-agents",
+    "secure",
+    "owasp",
+    "oauth2",
+    "content-creation",
+    "seo",
+    "tubemind"
+  ],
+  "author": {
+    "name": "Wanderson Leandro de Oliveira",
+    "email": "wleandro.oliveira@gmail.com",
+    "url": "https://github.com/wleandrooliveira"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dewtech-technologies/tubemind-secure-mcp.git"
+  },
+  "homepage": "https://github.com/dewtech-technologies/tubemind-secure-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/dewtech-technologies/tubemind-secure-mcp/issues"
   },
   "scripts": {
     "build": "tsc",

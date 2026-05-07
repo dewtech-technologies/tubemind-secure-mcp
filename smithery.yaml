@@ -1,0 +1,65 @@
+startCommand:
+  type: stdio
+  configSchema:
+    type: object
+    required:
+      - youtubeClientId
+      - youtubeClientSecret
+      - tokenEncryptionKey
+    properties:
+      youtubeClientId:
+        type: string
+        title: YouTube OAuth2 Client ID
+        description: Google OAuth2 Client ID with YouTube Data API v3 + YouTube Analytics API enabled
+      youtubeClientSecret:
+        type: string
+        title: YouTube OAuth2 Client Secret
+        description: Google OAuth2 Client Secret
+        format: password
+      youtubeRedirectUri:
+        type: string
+        title: OAuth2 Redirect URI
+        default: http://localhost:4000/oauth/callback
+      tokenEncryptionKey:
+        type: string
+        title: Token Encryption Key (64-char hex)
+        description: AES-256-GCM key for token encryption at rest. Generate with `openssl rand -hex 32`
+        format: password
+      rateLimitPerMinute:
+        type: number
+        title: Rate limit per minute
+        default: 60
+      requestTimeoutMs:
+        type: number
+        title: Request timeout (ms)
+        default: 10000
+      auditLogPath:
+        type: string
+        title: Audit log path
+        default: ./logs/audit.log
+      nodeEnv:
+        type: string
+        title: Node environment
+        enum:
+          - production
+          - development
+        default: production
+  commandFunction: |
+    (config) => ({
+      command: 'npx',
+      args: ['-y', 'tubemind-secure-mcp'],
+      env: {
+        YOUTUBE_CLIENT_ID: config.youtubeClientId,
+        YOUTUBE_CLIENT_SECRET: config.youtubeClientSecret,
+        YOUTUBE_REDIRECT_URI: config.youtubeRedirectUri || 'http://localhost:4000/oauth/callback',
+        TOKEN_ENCRYPTION_KEY: config.tokenEncryptionKey,
+        RATE_LIMIT_PER_MINUTE: String(config.rateLimitPerMinute || 60),
+        REQUEST_TIMEOUT_MS: String(config.requestTimeoutMs || 10000),
+        AUDIT_LOG_PATH: config.auditLogPath || './logs/audit.log',
+        NODE_ENV: config.nodeEnv || 'production'
+      }
+    })
+
+build:
+  dockerfile: Dockerfile
+  dockerBuildPath: .
