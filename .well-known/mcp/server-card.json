@@ -1,6 +1,6 @@
 {
   "name": "tubemind-secure-mcp",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Secure MCP server for YouTube intelligence — 18 tools across search, video, analytics, benchmark, heuristics and competitor research. Powered by YouTube Data API v3 + Analytics API with OAuth2 (Brand Account support), AES-256-GCM token encryption and OWASP Top 10 controls.",
   "tools": [
     { "name": "search_trending_topics", "description": "Discover trending topics by region/category" },
