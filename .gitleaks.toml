@@ -1,0 +1,12 @@
+# Configuração customizada para gitleaks no tubemind-secure-mcp v0.2
+# Ignora fixtures de teste (que podem conter dummy keys propositais)
+
+title = "tubemind-secure-mcp gitleaks config"
+
+[allowlist]
+paths = [
+  '''tests/fixtures/.*''',
+  '''DARE/.*''',
+  '''\.env\.example$''',
+  '''docs/.*''',
+]

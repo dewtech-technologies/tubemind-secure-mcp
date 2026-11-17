@@ -1,8 +1,9 @@
-import { z } from 'zod'
 import { SearchTrendingSchema, GetKeywordStatsSchema, SuggestTagsSchema } from '../schemas/input.schemas.js'
-import { searchVideos, getVideoById, getYouTubeClient } from '../services/youtube.service.js'
+import { searchVideos, getVideosByIdsBatched, getYouTubeClient } from '../services/youtube.service.js'
 import { checkRateLimit } from '../security/rate-limiter.service.js'
 import { withAudit } from '../security/audit.service.js'
+import { recordQuota } from '../services/quota.service.js'
+import { sha256 } from '../utils/hash.js'
 
 // ─── search_trending_topics ───────────────────────────────────────────────────
 
@@ -94,9 +95,11 @@ export async function getKeywordStats(
       .map(r => r.id?.videoId)
       .filter((id): id is string => !!id)
 
-    const videoDetails = await Promise.all(
-      videoIds.slice(0, 5).map(id => getVideoById(client, id))
-    )
+    const tokenHashKw = sha256(accessToken)
+    const videoDetails = await getVideosByIdsBatched(client, videoIds.slice(0, 5), {
+      tokenHash: tokenHashKw,
+      toolName: 'get_keyword_stats',
+    })
 
     const validVideos = videoDetails.filter(Boolean)
 
@@ -163,11 +166,13 @@ export async function suggestTags(
 
     const input = SuggestTagsSchema.parse(rawInput)
     const client = getYouTubeClient(accessToken)
+    const tokenHash = sha256(accessToken)
+    recordQuota('youtube:search.list', tokenHash, 'suggest_tags')
 
     const results = await searchVideos(client, input.keyword, input.videoCount, input.regionCode, 'relevance')
     const videoIds = results.map(r => r.id?.videoId).filter((id): id is string => !!id)
 
-    const videoDetails = await Promise.all(videoIds.map(id => getVideoById(client, id)))
+    const videoDetails = await getVideosByIdsBatched(client, videoIds, { tokenHash, toolName: 'suggest_tags' })
 
     // Coleta todas as tags dos top vídeos
     const allTags: string[] = videoDetails

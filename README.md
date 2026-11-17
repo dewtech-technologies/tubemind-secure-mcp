@@ -155,6 +155,15 @@ Restart Claude Desktop. The 18 tools will appear automatically.
 | | `analyze_retention_signals` | Retention-shaping factors |
 | | `generate_content_calendar` | N-day content plan |
 | **Competitor** | `get_competitor_videos` | Top videos from a competitor channel |
+| **Data** | `get_channel_details` | Channel profile and stats by UC ID, @handle or URL (1 unit) |
+| | `list_channel_playlists` | Public playlists of a channel, paginated (1 unit) |
+| | `get_playlist_items` | Playlist metadata + videos with duration/views (3 units) |
+| | `get_video_details` | Full video details: format, chapters, live data, engagement (1 unit) |
+| | `get_trending_videos` | Official `mostPopular` chart by country and category (1 unit) |
+| | `list_video_comments` | Raw comments + up to 5 replies, PII redacted (1 unit) |
+| | `list_comment_replies` | All replies of a comment, PII redacted (1 unit) |
+| | `batch_lookup` | Up to 50 videos or channels in a single call (1 unit) |
+| | `resolve_youtube_url` | Detect URL type and extract IDs (0 units; 1 to resolve @handle) |
 
 All inputs are validated with **Zod**. All errors return safe messages (stack traces only when `NODE_ENV=development`).
 

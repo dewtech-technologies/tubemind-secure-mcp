@@ -1,8 +1,14 @@
 import { google, youtube_v3 } from 'googleapis'
 import { assertAllowedDomain } from '../security/ssrf-guard.service.js'
+import { recordQuota } from './quota.service.js'
+import { withCache } from './cache.service.js'
 
 assertAllowedDomain('www.googleapis.com')
 assertAllowedDomain('youtube.googleapis.com')
+
+// videoId YouTube: 11 chars de [A-Za-z0-9_-] (RS-3.6 aplicado preventivamente)
+const VIDEO_ID_REGEX = /^[a-zA-Z0-9_-]{11}$/
+const VIDEOS_LIST_CHUNK_SIZE = 50 // limite oficial da API
 
 export type YouTubeClient = youtube_v3.Youtube
 
@@ -176,4 +182,96 @@ export async function getChannelStats(
     id: [channelId],
   })
   return res.data.items?.[0]?.statistics ?? null
+}
+
+// ─── Captions (v0.2 task-010 — Camada 3 NLP) ──────────────────────────────────
+
+/**
+ * Lista as captions disponíveis para um vídeo. Registra 50 quota units.
+ * Retorna array (possivelmente vazio se vídeo não tem captions habilitadas).
+ */
+export async function listCaptions(
+  client: YouTubeClient,
+  videoId: string,
+  tokenHash: string,
+  toolName: string,
+): Promise<youtube_v3.Schema$Caption[]> {
+  const res = await client.captions.list({ part: ['snippet'], videoId })
+  recordQuota('youtube:captions.list', tokenHash, toolName)
+  return res.data.items ?? []
+}
+
+/**
+ * Baixa o conteúdo da caption no formato SRT. Registra 200 quota units (CARO).
+ * Cache externo OBRIGATÓRIO para evitar repetições.
+ */
+export async function downloadCaption(
+  client: YouTubeClient,
+  captionId: string,
+  tokenHash: string,
+  toolName: string,
+): Promise<string> {
+  const res = await client.captions.download({ id: captionId, tfmt: 'srt' })
+  recordQuota('youtube:captions.download', tokenHash, toolName)
+  // res.data pode ser string OU Blob/Buffer dependendo do client; normalizamos para string
+  if (typeof res.data === 'string') return res.data
+  if (res.data instanceof Buffer) return res.data.toString('utf-8')
+  // Última opção: stringify (raro)
+  return String(res.data ?? '')
+}
+
+// ─── Batch fetch (v0.2 task-004 — RF-1.7, RF-1.8) ─────────────────────────────
+
+/**
+ * Busca múltiplos vídeos por ID em lotes de até 50 (limite oficial videos.list).
+ *
+ * Vantagem: 50 IDs = 1 chamada API = 1 quota unit (vs 50 chamadas = 50 units no
+ * padrão antigo `Promise.all(ids.map(getVideoById))`).
+ *
+ * - Filtra IDs inválidos via regex preventivamente (segurança + economia).
+ * - Preserva a ordem dos IDs de entrada (positions com `null` para não-encontrados).
+ * - Registra 1 quota unit por chunk no quota_log (se tokenHash + toolName providos).
+ * - Cacheável: dado o conjunto ordenado de IDs, cache hit no 2º call (TTL 6h).
+ */
+export async function getVideosByIdsBatched(
+  client: YouTubeClient,
+  ids: readonly string[],
+  options: { tokenHash?: string; toolName?: string; useCache?: boolean } = {},
+): Promise<Array<youtube_v3.Schema$Video | null>> {
+  const validIds = ids.filter((id) => VIDEO_ID_REGEX.test(id))
+  if (validIds.length === 0) return ids.map(() => null)
+
+  const fetcher = async (): Promise<youtube_v3.Schema$Video[]> => {
+    const all: youtube_v3.Schema$Video[] = []
+    for (let i = 0; i < validIds.length; i += VIDEOS_LIST_CHUNK_SIZE) {
+      const chunk = validIds.slice(i, i + VIDEOS_LIST_CHUNK_SIZE)
+      const res = await client.videos.list({
+        part: ['snippet', 'statistics', 'contentDetails'],
+        id: chunk,
+      })
+      all.push(...(res.data.items ?? []))
+
+      if (options.tokenHash && options.toolName) {
+        recordQuota('youtube:videos.list', options.tokenHash, options.toolName)
+      }
+    }
+    return all
+  }
+
+  const allVideos =
+    options.useCache !== false && options.tokenHash
+      ? await withCache(
+          'videos_batch',
+          { ids: [...validIds].sort() }, // chave determinística independente de ordem
+          options.tokenHash,
+          fetcher,
+        )
+      : await fetcher()
+
+  // Preserva ordem dos IDs de entrada
+  const byId = new Map<string, youtube_v3.Schema$Video>()
+  for (const v of allVideos) {
+    if (v.id) byId.set(v.id, v)
+  }
+  return ids.map((id) => byId.get(id) ?? null)
 }

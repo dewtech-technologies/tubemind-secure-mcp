@@ -1,8 +1,8 @@
 {
   "name": "tubemind-secure-mcp",
   "mcpName": "io.github.dewtech-technologies/tubemind-secure-mcp",
-  "version": "0.1.3",
-  "description": "Secure Model Context Protocol server for YouTube intelligence — 18 tools (search, analytics, benchmark, heuristics, competitor research) powered by YouTube Data API v3 + Analytics API, OAuth2 (Brand Account support), AES-256-GCM token encryption, OWASP Top 10 controls.",
+  "version": "0.2.0",
+  "description": "Secure Model Context Protocol server for YouTube intelligence — 37 tools (search, analytics, benchmark, heuristics, competitor, vision, NLP, pipeline, channel/playlist/video/comment data) powered by YouTube Data API v3 + Analytics API + Claude Vision/Sonnet, OAuth2 (Brand Account support), AES-256-GCM token encryption, OWASP Top 10 controls, SQLite cache.",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
@@ -52,27 +52,31 @@
     "dev": "tsx watch src/index.ts",
     "start": "node dist/index.js",
     "typecheck": "tsc --noEmit",
-    "test": "vitest --passWithNoTests",
+    "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "audit:security": "pnpm audit --audit-level=high",
     "auth": "tsx --env-file=.env src/auth-server.ts",
     "lint": "eslint src --ext .ts"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "1.26.0",
+    "@anthropic-ai/sdk": "0.32.1",
+    "@modelcontextprotocol/sdk": "1.32.2",
+    "better-sqlite3": "11.5.0",
     "googleapis": "171.4.0",
-    "zod": "3.25.28"
+    "sharp": "0.35.5",
+    "zod": "4.6.7"
   },
   "devDependencies": {
+    "@types/better-sqlite3": "7.6.11",
     "@types/node": "22.15.17",
     "@typescript-eslint/eslint-plugin": "8.59.2",
     "@typescript-eslint/parser": "8.59.2",
-    "@vitest/coverage-v8": "4.1.5",
+    "@vitest/coverage-v8": "4.1.12",
     "eslint": "9.39.4",
     "tsx": "4.19.4",
     "typescript": "5.7.3",
-    "vite": "6.4.2",
-    "vitest": "4.1.5"
+    "vite": "8.3.8",
+    "vitest": "4.1.12"
   },
   "engines": {
     "node": ">=20.0.0",
@@ -81,7 +85,21 @@
   "pnpm": {
     "overrides": {
       "esbuild": ">=0.25.0",
-      "vite": ">=6.4.2"
+      "vite": ">=8.1.6",
+      "fast-uri": ">=3.1.9 <4",
+      "hono": ">=4.13.16",
+      "@hono/node-server": ">=1.19.18 <2 || >=2.1.3",
+      "body-parser": ">=2.4.0",
+      "proxy-addr": ">=2.0.8",
+      "ip-address": ">=10.7.4",
+      "qs": ">=6.16.1",
+      "brace-expansion@<2": ">=1.1.21 <2",
+      "js-yaml": ">=4.3.2 <5",
+      "nanoid@<4": ">=3.3.18 <4",
+      "postcss": ">=8.5.23",
+      "source-map-js": ">=1.2.2",
+      "brace-expansion@>=5 <6": ">=5.0.12 <6",
+      "form-data@>=4 <5": ">=4.0.6 <5"
     }
   },
   "packageManager": "pnpm@9.15.4+sha512.b2dc20e2fc72b3e18848459b37359a32064663e5627a51e4c74b2c29dd8e8e0491483c3abb40789cfd578bf362fb6ba8261b05f0387d76792ed6e23ea3b1b6a0"

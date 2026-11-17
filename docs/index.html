@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tubemind-secure-mcp — YouTube intelligence for Claude</title>
+  <meta name="description" content="Secure Model Context Protocol server for YouTube intelligence. 18 tools (search, analytics, benchmark, heuristics, competitor research) for Claude Desktop. OAuth2 + AES-256-GCM + OWASP Top 10." />
+  <meta name="theme-color" content="#0f0f0f" />
+
+  <meta property="og:title" content="tubemind-secure-mcp" />
+  <meta property="og:description" content="YouTube intelligence, powered by Claude. Secure by design. 18 production tools." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://dewtech-technologies.github.io/tubemind-secure-mcp/" />
+  <meta property="og:image" content="https://dewtech-technologies.github.io/tubemind-secure-mcp/assets/og.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <link rel="icon" type="image/svg+xml" href="assets/logo.svg" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            bg: '#0a0a0a',
+            panel: '#111111',
+            accent: '#FF0033',
+            accent2: '#5A67D8',
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'Menlo', 'monospace'],
+          },
+        },
+      },
+    };
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    body { background: radial-gradient(ellipse at top, #1a0008 0%, #0a0a0a 60%); }
+    .glow { box-shadow: 0 0 60px -10px rgba(255, 0, 51, 0.4); }
+    .grid-bg {
+      background-image:
+        linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+    pre code { display: block; white-space: pre-wrap; word-break: break-word; }
+    .anchor-offset { scroll-margin-top: 80px; }
+  </style>
+</head>
+<body class="bg-bg text-zinc-100 font-sans antialiased min-h-screen">
+
+  <!-- NAV -->
+  <nav class="sticky top-0 z-50 backdrop-blur-md bg-bg/80 border-b border-zinc-900">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+      <a href="#" class="flex items-center gap-2 font-semibold">
+        <img src="assets/logo.svg" alt="" class="w-7 h-7" />
+        <span>tubemind-secure-mcp</span>
+      </a>
+      <div class="hidden md:flex items-center gap-6 text-sm text-zinc-400">
+        <a href="#features" class="hover:text-white">Features</a>
+        <a href="#tools" class="hover:text-white">Tools</a>
+        <a href="#install" class="hover:text-white">Install</a>
+        <a href="#security" class="hover:text-white">Security</a>
+        <a href="https://github.com/dewtech-technologies/tubemind-secure-mcp" class="hover:text-white">GitHub</a>
+      </div>
+      <a href="#install"
+         class="px-4 py-2 rounded-lg bg-accent text-white text-sm font-medium hover:bg-red-600 transition">
+        Get started
+      </a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="relative overflow-hidden">
+    <div class="absolute inset-0 grid-bg opacity-40 pointer-events-none"></div>
+    <div class="relative max-w-6xl mx-auto px-6 pt-24 pb-20 text-center">
+      <div class="inline-flex items-center gap-2 px-3 py-1 mb-6 rounded-full border border-zinc-800 bg-zinc-900/60 text-xs text-zinc-400">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        Live on Anthropic MCP Registry &amp; npm
+      </div>
+
+      <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight mb-6">
+        <span class="bg-gradient-to-br from-white via-zinc-200 to-zinc-500 bg-clip-text text-transparent">YouTube intelligence,</span><br />
+        <span class="bg-gradient-to-br from-accent via-rose-400 to-amber-300 bg-clip-text text-transparent">powered by Claude.</span>
+      </h1>
+
+      <p class="text-lg md:text-xl text-zinc-400 max-w-2xl mx-auto mb-10">
+        Secure Model Context Protocol server giving Claude Desktop
+        <strong class="text-white">18 production-grade tools</strong> for YouTube research, analytics,
+        benchmarking and content strategy.
+      </p>
+
+      <div class="flex flex-wrap items-center justify-center gap-3 mb-12">
+        <a href="#install" class="px-6 py-3 rounded-lg bg-accent text-white font-medium hover:bg-red-600 transition glow">
+          Install with Claude Desktop
+        </a>
+        <a href="https://github.com/dewtech-technologies/tubemind-secure-mcp"
+           class="px-6 py-3 rounded-lg border border-zinc-800 hover:border-zinc-600 transition flex items-center gap-2">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.4 3-.405 1.02.005 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+          Star on GitHub
+        </a>
+      </div>
+
+      <!-- Badges row -->
+      <div class="flex flex-wrap items-center justify-center gap-2">
+        <img src="https://img.shields.io/npm/v/tubemind-secure-mcp?style=flat-square&color=CB3837&logo=npm" alt="npm version" />
+        <img src="https://img.shields.io/npm/dt/tubemind-secure-mcp?style=flat-square&label=npm%20downloads" alt="downloads" />
+        <img src="https://img.shields.io/badge/Anthropic_MCP_Registry-listed-5A67D8?style=flat-square&logo=anthropic&logoColor=white" alt="MCP Registry" />
+        <img src="https://img.shields.io/badge/Security-OWASP_Top_10-5A67D8?style=flat-square" alt="OWASP" />
+        <img src="https://img.shields.io/badge/License-MIT-blue?style=flat-square" alt="MIT" />
+      </div>
+    </div>
+  </section>
+
+  <!-- VALUE PROPS -->
+  <section id="features" class="anchor-offset py-20 border-t border-zinc-900">
+    <div class="max-w-6xl mx-auto px-6">
+      <h2 class="text-3xl md:text-4xl font-bold text-center mb-4">Why tubemind-secure-mcp?</h2>
+      <p class="text-center text-zinc-400 mb-12 max-w-2xl mx-auto">
+        Turn Claude into a YouTube growth strategist — without ever handing it your raw OAuth tokens.
+      </p>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="p-6 rounded-2xl bg-panel border border-zinc-900 hover:border-zinc-700 transition">
+          <div class="text-3xl mb-3">⚡</div>
+          <h3 class="font-semibold text-lg mb-2">Plug-and-play with Claude Desktop</h3>
+          <p class="text-zinc-400 text-sm">Drop one config block, get 18 production tools instantly.</p>
+        </div>
+        <div class="p-6 rounded-2xl bg-panel border border-zinc-900 hover:border-zinc-700 transition">
+          <div class="text-3xl mb-3">🔐</div>
+          <h3 class="font-semibold text-lg mb-2">Secure by default</h3>
+          <p class="text-zinc-400 text-sm">AES-256-GCM token encryption at rest, SSRF guard, rate limiting,
+            audit log, Zod-validated inputs. <strong class="text-white">OWASP Top 10</strong> mapped end-to-end.</p>
+        </div>
+        <div class="p-6 rounded-2xl bg-panel border border-zinc-900 hover:border-zinc-700 transition">
+          <div class="text-3xl mb-3">📊</div>
+          <h3 class="font-semibold text-lg mb-2">Real data, not scraping</h3>
+          <p class="text-zinc-400 text-sm">Official YouTube Data API v3 + YouTube Analytics API.
+            Brand Accounts supported.</p>
+        </div>
+        <div class="p-6 rounded-2xl bg-panel border border-zinc-900 hover:border-zinc-700 transition">
+          <div class="text-3xl mb-3">🧠</div>
+          <h3 class="font-semibold text-lg mb-2">Beyond raw API</h3>
+          <p class="text-zinc-400 text-sm">Built-in heuristics for CTR, retention, keyword difficulty,
+            content gaps, hook angles, N-day calendars.</p>
+        </div>
+        <div class="p-6 rounded-2xl bg-panel border border-zinc-900 hover:border-zinc-700 transition">
+          <div class="text-3xl mb-3">🪶</div>
+          <h3 class="font-semibold text-lg mb-2">Tiny footprint</h3>
+          <p class="text-zinc-400 text-sm">Only 3 runtime deps (<code class="text-amber-300">@modelcontextprotocol/sdk</code>,
+            <code class="text-amber-300">googleapis</code>, <code class="text-amber-300">zod</code>). Node ≥ 20.</p>
+        </div>
+        <div class="p-6 rounded-2xl bg-panel border border-zinc-900 hover:border-zinc-700 transition">
+          <div class="text-3xl mb-3">🛡️</div>
+          <h3 class="font-semibold text-lg mb-2">Local-only by design</h3>
+          <p class="text-zinc-400 text-sm">No central server. Tokens stay on your machine. Audit log written
+            locally to a file you own.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 18 TOOLS -->
+  <section id="tools" class="anchor-offset py-20 border-t border-zinc-900">
+    <div class="max-w-6xl mx-auto px-6">
+      <h2 class="text-3xl md:text-4xl font-bold text-center mb-4">18 tools for Claude</h2>
+      <p class="text-center text-zinc-400 mb-12 max-w-2xl mx-auto">
+        Every tool is rate-limited, audit-logged and validated with Zod schemas.
+      </p>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
+        <!-- Search -->
+        <div class="p-5 rounded-xl bg-panel border border-zinc-900">
+          <div class="text-xs text-accent font-mono uppercase tracking-wider mb-2">Search</div>
+          <ul class="space-y-2 text-sm">
+            <li><code class="text-amber-300">search_trending_topics</code><div class="text-zinc-500 text-xs">Discover trending topics by region/category</div></li>
+            <li><code class="text-amber-300">get_keyword_stats</code><div class="text-zinc-500 text-xs">Search-volume signals for keywords</div></li>
+            <li><code class="text-amber-300">suggest_tags</code><div class="text-zinc-500 text-xs">Tag recommendations from a seed</div></li>
+          </ul>
+        </div>
+
+        <!-- Video -->
+        <div class="p-5 rounded-xl bg-panel border border-zinc-900">
+          <div class="text-xs text-accent font-mono uppercase tracking-wider mb-2">Video</div>
+          <ul class="space-y-2 text-sm">
+            <li><code class="text-amber-300">get_video_tags</code><div class="text-zinc-500 text-xs">Read tags from a video</div></li>
+            <li><code class="text-amber-300">update_video_metadata</code><div class="text-zinc-500 text-xs">Update title/description/tags</div></li>
+            <li><code class="text-amber-300">list_channel_videos</code><div class="text-zinc-500 text-xs">Paginate channel uploads</div></li>
+          </ul>
+        </div>
+
+        <!-- Analytics -->
+        <div class="p-5 rounded-xl bg-panel border border-zinc-900">
+          <div class="text-xs text-accent font-mono uppercase tracking-wider mb-2">Analytics</div>
+          <ul class="space-y-2 text-sm">
+            <li><code class="text-amber-300">get_channel_analytics</code><div class="text-zinc-500 text-xs">Views, watch time, retention</div></li>
+            <li><code class="text-amber-300">score_best_publish_window</code><div class="text-zinc-500 text-xs">Best day/hour heatmap</div></li>
+          </ul>
+        </div>
+
+        <!-- Benchmark -->
+        <div class="p-5 rounded-xl bg-panel border border-zinc-900">
+          <div class="text-xs text-accent font-mono uppercase tracking-wider mb-2">Benchmark</div>
+          <ul class="space-y-2 text-sm">
+            <li><code class="text-amber-300">benchmark_channel</code><div class="text-zinc-500 text-xs">Compare a channel against peers</div></li>
+          </ul>
+        </div>
+
+        <!-- Competitor -->
+        <div class="p-5 rounded-xl bg-panel border border-zinc-900">
+          <div class="text-xs text-accent font-mono uppercase tracking-wider mb-2">Competitor</div>
+          <ul class="space-y-2 text-sm">
+            <li><code class="text-amber-300">get_competitor_videos</code><div class="text-zinc-500 text-xs">Top videos from a competitor</div></li>
+          </ul>
+        </div>
+
+        <!-- Heuristics -->
+        <div class="p-5 rounded-xl bg-panel border border-zinc-900">
+          <div class="text-xs text-accent font-mono uppercase tracking-wider mb-2">Heuristics</div>
+          <ul class="space-y-2 text-sm">
+            <li><code class="text-amber-300">estimate_keyword_difficulty</code></li>
+            <li><code class="text-amber-300">analyze_title_patterns</code></li>
+            <li><code class="text-amber-300">detect_content_gaps</code></li>
+          </ul>
+        </div>
+
+        <!-- Heuristics+ -->
+        <div class="p-5 rounded-xl bg-panel border border-zinc-900 lg:col-span-2">
+          <div class="text-xs text-accent font-mono uppercase tracking-wider mb-2">Heuristics&nbsp;+ (advanced)</div>
+          <ul class="grid md:grid-cols-2 gap-2 text-sm">
+            <li><code class="text-amber-300">estimate_ctr_potential</code></li>
+            <li><code class="text-amber-300">suggest_hook_angles</code></li>
+            <li><code class="text-amber-300">find_trending_keywords</code></li>
+            <li><code class="text-amber-300">analyze_retention_signals</code></li>
+            <li><code class="text-amber-300">generate_content_calendar</code></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- INSTALL -->
+  <section id="install" class="anchor-offset py-20 border-t border-zinc-900">
+    <div class="max-w-4xl mx-auto px-6">
+      <h2 class="text-3xl md:text-4xl font-bold text-center mb-4">Get started in 3 steps</h2>
+      <p class="text-center text-zinc-400 mb-12">Estimated time: 5 minutes.</p>
+
+      <!-- Step 1 -->
+      <div class="mb-10">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-9 h-9 rounded-full bg-accent text-white font-bold flex items-center justify-center">1</div>
+          <h3 class="text-xl font-semibold">Install the package</h3>
+        </div>
+        <pre class="bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-sm overflow-x-auto"><code class="font-mono text-zinc-200">npm install -g tubemind-secure-mcp</code></pre>
+        <p class="text-zinc-500 text-sm mt-2">Or run on demand: <code class="text-amber-300">npx tubemind-secure-mcp</code></p>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="mb-10">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-9 h-9 rounded-full bg-accent text-white font-bold flex items-center justify-center">2</div>
+          <h3 class="text-xl font-semibold">Authorize your YouTube account</h3>
+        </div>
+        <ol class="space-y-3 text-zinc-300 text-sm mb-4">
+          <li>1. Go to <a class="text-accent hover:underline" href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener">Google Cloud Console → Credentials</a></li>
+          <li>2. Enable <strong>YouTube Data API v3</strong> and <strong>YouTube Analytics API</strong></li>
+          <li>3. Create OAuth 2.0 Client ID → <strong>Web application</strong></li>
+          <li>4. Authorized redirect URI: <code class="text-amber-300">http://localhost:4000/oauth/callback</code></li>
+          <li>5. Copy <code class="text-amber-300">CLIENT_ID</code> and <code class="text-amber-300">CLIENT_SECRET</code> to <code class="text-amber-300">.env</code></li>
+          <li>6. Run <code class="text-amber-300">pnpm auth</code> and sign in with the Google account that owns the channel</li>
+        </ol>
+        <pre class="bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-sm overflow-x-auto"><code class="font-mono text-zinc-200">YOUTUBE_CLIENT_ID=your-client-id.apps.googleusercontent.com
+YOUTUBE_CLIENT_SECRET=your-client-secret
+YOUTUBE_REDIRECT_URI=http://localhost:4000/oauth/callback
+
+# generate with: openssl rand -hex 32
+TOKEN_ENCRYPTION_KEY=your-64-char-hex-key
+
+RATE_LIMIT_PER_MINUTE=60
+REQUEST_TIMEOUT_MS=10000
+AUDIT_LOG_PATH=./logs/audit.log
+NODE_ENV=production</code></pre>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="mb-4">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-9 h-9 rounded-full bg-accent text-white font-bold flex items-center justify-center">3</div>
+          <h3 class="text-xl font-semibold">Add to Claude Desktop</h3>
+        </div>
+        <p class="text-zinc-400 text-sm mb-3">
+          Edit <code class="text-amber-300">claude_desktop_config.json</code>
+          (<code class="text-amber-300">%APPDATA%\Claude\</code> on Windows,
+          <code class="text-amber-300">~/Library/Application Support/Claude/</code> on macOS):
+        </p>
+        <pre class="bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-sm overflow-x-auto"><code class="font-mono text-zinc-200">{
+  "mcpServers": {
+    "tubemind": {
+      "command": "npx",
+      "args": ["-y", "tubemind-secure-mcp"],
+      "env": {
+        "YOUTUBE_CLIENT_ID": "...",
+        "YOUTUBE_CLIENT_SECRET": "...",
+        "YOUTUBE_REDIRECT_URI": "http://localhost:4000/oauth/callback",
+        "TOKEN_ENCRYPTION_KEY": "...",
+        "NODE_ENV": "production"
+      }
+    }
+  }
+}</code></pre>
+        <p class="text-zinc-400 text-sm mt-3">Restart Claude Desktop. The 18 tools appear automatically.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECURITY -->
+  <section id="security" class="anchor-offset py-20 border-t border-zinc-900">
+    <div class="max-w-6xl mx-auto px-6">
+      <h2 class="text-3xl md:text-4xl font-bold text-center mb-4">Secure by design</h2>
+      <p class="text-center text-zinc-400 mb-12 max-w-2xl mx-auto">
+        Mapped to <strong class="text-white">OWASP Top 10</strong>. See
+        <a class="text-accent hover:underline" href="https://github.com/dewtech-technologies/tubemind-secure-mcp/blob/main/SECURITY.md">SECURITY.md</a> for the full posture.
+      </p>
+
+      <div class="overflow-x-auto rounded-xl border border-zinc-900">
+        <table class="w-full text-sm">
+          <thead class="bg-zinc-900/60">
+            <tr>
+              <th class="text-left px-4 py-3 font-medium text-zinc-300">Risk</th>
+              <th class="text-left px-4 py-3 font-medium text-zinc-300">Mitigation</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-zinc-900">
+            <tr><td class="px-4 py-3 font-mono text-xs text-accent2">A01 — Broken Access Control</td><td class="px-4 py-3 text-zinc-300">OAuth2 scopes least-privilege, audit log per call</td></tr>
+            <tr><td class="px-4 py-3 font-mono text-xs text-accent2">A02 — Cryptographic Failures</td><td class="px-4 py-3 text-zinc-300">AES-256-GCM at rest for tokens, secrets via env only</td></tr>
+            <tr><td class="px-4 py-3 font-mono text-xs text-accent2">A03 — Injection</td><td class="px-4 py-3 text-zinc-300">Zod schemas on every tool input</td></tr>
+            <tr><td class="px-4 py-3 font-mono text-xs text-accent2">A04 — Insecure Design</td><td class="px-4 py-3 text-zinc-300">Rate limit, request timeout, SSRF guard (host whitelist)</td></tr>
+            <tr><td class="px-4 py-3 font-mono text-xs text-accent2">A05 — Misconfiguration</td><td class="px-4 py-3 text-zinc-300"><code>.env.example</code> template, no leaky defaults</td></tr>
+            <tr><td class="px-4 py-3 font-mono text-xs text-accent2">A07 — AuthN Failures</td><td class="px-4 py-3 text-zinc-300">OAuth2 PKCE-style flow, encrypted token storage</td></tr>
+            <tr><td class="px-4 py-3 font-mono text-xs text-accent2">A08 — Integrity</td><td class="px-4 py-3 text-zinc-300">Pinned deps, <code>pnpm audit</code> in CI, dependabot</td></tr>
+            <tr><td class="px-4 py-3 font-mono text-xs text-accent2">A09 — Logging Failures</td><td class="px-4 py-3 text-zinc-300">Audit log of every tool call (timestamp, tool, success)</td></tr>
+            <tr><td class="px-4 py-3 font-mono text-xs text-accent2">A10 — SSRF</td><td class="px-4 py-3 text-zinc-300">Outbound calls restricted to <code>googleapis.com</code> family</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="text-center text-zinc-400 text-sm mt-6">
+        Found a vulnerability? Email <a class="text-accent hover:underline" href="mailto:wleandro.oliveira@gmail.com">wleandro.oliveira@gmail.com</a> — 72h response.
+      </p>
+    </div>
+  </section>
+
+  <!-- LINKS -->
+  <section class="py-20 border-t border-zinc-900">
+    <div class="max-w-4xl mx-auto px-6 text-center">
+      <h2 class="text-3xl md:text-4xl font-bold mb-8">Where to find tubemind</h2>
+      <div class="grid md:grid-cols-3 gap-4">
+        <a href="https://www.npmjs.com/package/tubemind-secure-mcp"
+           class="p-6 rounded-2xl bg-panel border border-zinc-900 hover:border-accent transition">
+          <div class="text-2xl mb-2">📦</div>
+          <div class="font-semibold mb-1">npm</div>
+          <div class="text-zinc-500 text-sm">tubemind-secure-mcp</div>
+        </a>
+        <a href="https://github.com/dewtech-technologies/tubemind-secure-mcp"
+           class="p-6 rounded-2xl bg-panel border border-zinc-900 hover:border-accent transition">
+          <div class="text-2xl mb-2">🐙</div>
+          <div class="font-semibold mb-1">GitHub</div>
+          <div class="text-zinc-500 text-sm">dewtech-technologies/tubemind-secure-mcp</div>
+        </a>
+        <a href="https://registry.modelcontextprotocol.io/v0/servers?search=tubemind"
+           class="p-6 rounded-2xl bg-panel border border-zinc-900 hover:border-accent transition">
+          <div class="text-2xl mb-2">🏛️</div>
+          <div class="font-semibold mb-1">MCP Registry</div>
+          <div class="text-zinc-500 text-sm">io.github.dewtech-technologies/tubemind-secure-mcp</div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-zinc-900 py-10">
+    <div class="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6 text-sm text-zinc-500">
+      <div class="flex items-center gap-2">
+        <img src="assets/logo.svg" alt="" class="w-5 h-5" />
+        <span>tubemind-secure-mcp · MIT</span>
+      </div>
+      <div class="flex items-center gap-6">
+        <a href="privacy.html" class="hover:text-white">Privacy Policy</a>
+        <a href="terms.html" class="hover:text-white">Terms of Service</a>
+        <a href="https://github.com/dewtech-technologies/tubemind-secure-mcp/blob/main/SECURITY.md" class="hover:text-white">Security</a>
+        <a href="mailto:wleandro.oliveira@gmail.com" class="hover:text-white">Contact</a>
+      </div>
+      <div>
+        Built by <a href="https://github.com/dewtech-technologies" class="hover:text-white">Dewtech</a>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

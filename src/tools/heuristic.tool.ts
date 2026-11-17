@@ -6,11 +6,13 @@ import {
 import {
   getYouTubeClient,
   searchVideos,
-  getVideoById,
+  getVideosByIdsBatched,
   getChannelStats,
 } from '../services/youtube.service.js'
 import { checkRateLimit } from '../security/rate-limiter.service.js'
 import { withAudit } from '../security/audit.service.js'
+import { recordQuota } from '../services/quota.service.js'
+import { sha256 } from '../utils/hash.js'
 
 // ─── estimate_keyword_difficulty ─────────────────────────────────────────────
 
@@ -38,6 +40,8 @@ export async function estimateKeywordDifficulty(
 
     const input = EstimateKeywordDifficultySchema.parse(rawInput)
     const client = getYouTubeClient(accessToken)
+    const tokenHash = sha256(accessToken)
+    recordQuota('youtube:search.list', tokenHash, 'estimate_keyword_difficulty')
 
     const searchResults = await searchVideos(client, input.keyword, input.maxVideos, input.regionCode, 'relevance')
     const videoIds = searchResults.map(r => r.id?.videoId).filter((id): id is string => !!id)
@@ -46,7 +50,7 @@ export async function estimateKeywordDifficulty(
       return `Nenhum vídeo encontrado para "${input.keyword}".`
     }
 
-    const videos = (await Promise.all(videoIds.map(id => getVideoById(client, id)))).filter(Boolean)
+    const videos = (await getVideosByIdsBatched(client, videoIds, { tokenHash, toolName: 'estimate_keyword_difficulty' })).filter(Boolean)
 
     // Coleta stats dos canais únicos
     const channelIds = [...new Set(videos.map(v => v?.snippet?.channelId).filter((id): id is string => !!id))]
@@ -174,11 +178,13 @@ export async function analyzeTitlePatterns(rawInput: unknown, accessToken: strin
 
     const input = AnalyzeTitlePatternsSchema.parse(rawInput)
     const client = getYouTubeClient(accessToken)
+    const tokenHash = sha256(accessToken)
+    recordQuota('youtube:search.list', tokenHash, 'analyze_title_patterns')
 
     const results = await searchVideos(client, input.niche, input.videoCount, input.regionCode, 'viewCount')
     const videoIds = results.map(r => r.id?.videoId).filter((id): id is string => !!id)
 
-    const videoDetails = (await Promise.all(videoIds.slice(0, 30).map(id => getVideoById(client, id)))).filter(Boolean)
+    const videoDetails = (await getVideosByIdsBatched(client, videoIds.slice(0, 30), { tokenHash, toolName: 'analyze_title_patterns' })).filter(Boolean)
 
     if (videoDetails.length === 0) return `Nenhum vídeo encontrado para "${input.niche}".`
 
@@ -297,6 +303,7 @@ export async function detectContentGaps(rawInput: unknown, accessToken: string):
 
     const input = DetectContentGapsSchema.parse(rawInput)
     const client = getYouTubeClient(accessToken)
+    const tokenHash = sha256(accessToken)
 
     const subtopics = generateSubtopics(input.niche)
     const now = Date.now()
@@ -304,6 +311,7 @@ export async function detectContentGaps(rawInput: unknown, accessToken: string):
     const analyses: SubtopicAnalysis[] = []
 
     for (const subtopic of subtopics) {
+      recordQuota('youtube:search.list', tokenHash, 'detect_content_gaps')
       const results = await searchVideos(client, subtopic, 10, input.regionCode, 'relevance')
       const videoIds = results.map(r => r.id?.videoId).filter((id): id is string => !!id).slice(0, 5)
 
@@ -312,7 +320,7 @@ export async function detectContentGaps(rawInput: unknown, accessToken: string):
         continue
       }
 
-      const videos = (await Promise.all(videoIds.map(id => getVideoById(client, id)))).filter(Boolean)
+      const videos = (await getVideosByIdsBatched(client, videoIds, { tokenHash, toolName: 'detect_content_gaps' })).filter(Boolean)
 
       const viewsList = videos.map(v => parseInt(v?.statistics?.viewCount ?? '0', 10))
       const avgViews = viewsList.length > 0

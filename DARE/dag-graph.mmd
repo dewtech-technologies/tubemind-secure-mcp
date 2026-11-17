@@ -1,0 +1,35 @@
+%% DARE DAG — Project - Development Tasks
+%% Generated: 2026-05-24T01:53:14.740Z
+graph LR
+  subgraph rank_0 ["Rank 0"]
+    direction TB
+    task_001["task-001\nContainerize app (Dockerfile + docker-compose)\n⏳ PENDING"]
+  end
+  subgraph rank_1 ["Rank 1"]
+    direction TB
+    task_002["task-002\nDatabase schema (migrations)\n⏳ PENDING"]
+  end
+  subgraph rank_2 ["Rank 2"]
+    direction TB
+    task_003["task-003\nCore API endpoints\n⏳ PENDING"]
+    task_004["task-004\nAuthentication\n⏳ PENDING"]
+  end
+  subgraph rank_3 ["Rank 3"]
+    direction TB
+    task_005["task-005\nReal test suite (unit + integration)\n⏳ PENDING"]
+  end
+  task_001 --> task_002
+  task_002 --> task_003
+  task_002 --> task_004
+  task_003 --> task_005
+  task_004 --> task_005
+  class task_001 st_pending;
+  class task_002 st_pending;
+  class task_003 st_pending;
+  class task_004 st_pending;
+  class task_005 st_pending;
+  classDef st_pending fill:#f3f4f6,stroke:#9ca3af,color:#374151;
+  classDef st_running fill:#dbeafe,stroke:#2563eb,color:#1e3a8a;
+  classDef st_done fill:#dcfce7,stroke:#16a34a,color:#14532d;
+  classDef st_failed fill:#fee2e2,stroke:#dc2626,color:#7f1d1d;
+  classDef st_skipped fill:#e5e7eb,stroke:#6b7280,color:#374151;

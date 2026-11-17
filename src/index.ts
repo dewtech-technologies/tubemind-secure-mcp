@@ -74,12 +74,71 @@ import {
   detectContentGaps,
 } from './tools/heuristic.tool.js'
 
+// v0.2 — Tools Camada 1 (Quota tracking)
+import { getQuotaUsageDefinition, getQuotaUsage } from './tools/quota.tool.js'
+
+// v0.2 — Tools Camada 2 (Vision)
+import {
+  analyzeThumbnailVisualsDefinition,
+  analyzeThumbnailVisuals,
+  scoreMyThumbnailDefinition,
+  scoreMyThumbnail,
+} from './tools/vision.tool.js'
+
+// v0.2 — Tools Camada 3 (NLP)
+import {
+  analyzeVideoCommentsDefinition,
+  analyzeVideoComments,
+  analyzeVideoTranscriptDefinition,
+  analyzeVideoTranscript,
+  reverseEngineerViralVideoDefinition,
+  reverseEngineerViralVideoHandler,
+} from './tools/nlp.tool.js'
+
+// v0.2 — Tools Camada 4 (Pipeline)
+import {
+  generateFullScriptDefinition,
+  generateFullScript,
+  optimizeVideoDescriptionDefinition,
+  optimizeVideoDescription,
+  predictVideoPerformanceDefinition,
+  predictVideoPerformanceHandler,
+  runWorkflowDefinition,
+  runWorkflow,
+} from './tools/pipeline.tool.js'
+
+// v0.3 — Tools de dados (paridade: canal, playlist, vídeo, comentários, lote)
+import {
+  getChannelDetailsDefinition,
+  getChannelDetails,
+  listChannelPlaylistsDefinition,
+  listChannelPlaylists,
+  getPlaylistItemsDefinition,
+  getPlaylistItems,
+  batchLookupDefinition,
+  batchLookup,
+  resolveYouTubeUrlDefinition,
+  resolveYouTubeUrl,
+} from './tools/channel-data.tool.js'
+import {
+  getVideoDetailsDefinition,
+  getVideoDetails,
+  getTrendingVideosDefinition,
+  getTrendingVideos,
+  listVideoCommentsDefinition,
+  listVideoComments,
+  listCommentRepliesDefinition,
+  listCommentReplies,
+} from './tools/video-data.tool.js'
+
 // ─── Server ───────────────────────────────────────────────────────────────────
+
+const VERSION = '0.2.0'
 
 const server = new Server(
   {
     name: 'tubemind-secure-mcp',
-    version: '0.1.0',
+    version: VERSION,
   },
   {
     capabilities: { tools: {} },
@@ -108,6 +167,30 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
     findTrendingKeywordsDefinition,
     analyzeRetentionSignalsDefinition,
     generateContentCalendarDefinition,
+    // v0.2 Camada 1
+    getQuotaUsageDefinition,
+    // v0.2 Camada 2
+    analyzeThumbnailVisualsDefinition,
+    scoreMyThumbnailDefinition,
+    // v0.2 Camada 3
+    analyzeVideoCommentsDefinition,
+    analyzeVideoTranscriptDefinition,
+    reverseEngineerViralVideoDefinition,
+    // v0.2 Camada 4
+    generateFullScriptDefinition,
+    optimizeVideoDescriptionDefinition,
+    predictVideoPerformanceDefinition,
+    runWorkflowDefinition,
+    // v0.3 Dados
+    getChannelDetailsDefinition,
+    listChannelPlaylistsDefinition,
+    getPlaylistItemsDefinition,
+    getVideoDetailsDefinition,
+    getTrendingVideosDefinition,
+    listVideoCommentsDefinition,
+    listCommentRepliesDefinition,
+    batchLookupDefinition,
+    resolveYouTubeUrlDefinition,
   ],
 }))
 
@@ -189,6 +272,68 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       case 'generate_content_calendar':
         result = await generateContentCalendar(args, accessToken)
         break
+      // v0.2 Camada 1
+      case 'get_quota_usage':
+        result = await getQuotaUsage(args, accessToken)
+        break
+      // v0.2 Camada 2
+      case 'analyze_thumbnail_visuals':
+        result = await analyzeThumbnailVisuals(args, accessToken)
+        break
+      case 'score_my_thumbnail':
+        result = await scoreMyThumbnail(args, accessToken)
+        break
+      // v0.2 Camada 3
+      case 'analyze_video_comments':
+        result = await analyzeVideoComments(args, accessToken)
+        break
+      case 'analyze_video_transcript':
+        result = await analyzeVideoTranscript(args, accessToken)
+        break
+      case 'reverse_engineer_viral_video':
+        result = await reverseEngineerViralVideoHandler(args, accessToken)
+        break
+      // v0.3 Dados
+      case 'get_channel_details':
+        result = await getChannelDetails(args, accessToken)
+        break
+      case 'list_channel_playlists':
+        result = await listChannelPlaylists(args, accessToken)
+        break
+      case 'get_playlist_items':
+        result = await getPlaylistItems(args, accessToken)
+        break
+      case 'get_video_details':
+        result = await getVideoDetails(args, accessToken)
+        break
+      case 'get_trending_videos':
+        result = await getTrendingVideos(args, accessToken)
+        break
+      case 'list_video_comments':
+        result = await listVideoComments(args, accessToken)
+        break
+      case 'list_comment_replies':
+        result = await listCommentReplies(args, accessToken)
+        break
+      case 'batch_lookup':
+        result = await batchLookup(args, accessToken)
+        break
+      case 'resolve_youtube_url':
+        result = await resolveYouTubeUrl(args, accessToken)
+        break
+      // v0.2 Camada 4
+      case 'generate_full_script':
+        result = await generateFullScript(args, accessToken)
+        break
+      case 'optimize_video_description':
+        result = await optimizeVideoDescription(args, accessToken)
+        break
+      case 'predict_video_performance':
+        result = await predictVideoPerformanceHandler(args, accessToken)
+        break
+      case 'run_workflow':
+        result = await runWorkflow(args, accessToken)
+        break
       default:
         return {
           content: [{ type: 'text', text: `❌ Tool desconhecida: "${name}"` }],
@@ -231,7 +376,12 @@ async function main() {
   const transport = new StdioServerTransport()
   await server.connect(transport)
   // Log vai para stderr para não poluir o protocolo MCP (stdout)
-  console.error('🧠 tubemind-secure-mcp iniciado')
+  const cacheEnabled = process.env['TUBEMIND_CACHE_ENABLED'] !== 'false'
+  const llmAvailable = !!process.env['ANTHROPIC_API_KEY']
+  console.error(
+    `🧠 tubemind-secure-mcp v${VERSION} iniciado (stdio mode) — ` +
+    `cache=${cacheEnabled ? 'on' : 'off'}, llm=${llmAvailable ? 'on' : 'off'}`,
+  )
 }
 
 main().catch((err) => {

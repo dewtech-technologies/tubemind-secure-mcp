@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy — tubemind-secure-mcp</title>
+  <meta name="description" content="Privacy Policy for tubemind-secure-mcp." />
+  <link rel="icon" type="image/svg+xml" href="assets/logo.svg" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    body { background: #0a0a0a; font-family: 'Inter', system-ui, sans-serif; }
+    .prose h2 { color: #fff; font-size: 1.5rem; font-weight: 700; margin-top: 2.5rem; margin-bottom: 1rem; }
+    .prose h3 { color: #fff; font-size: 1.15rem; font-weight: 600; margin-top: 2rem; margin-bottom: .5rem; }
+    .prose p, .prose li { color: #a1a1aa; line-height: 1.7; }
+    .prose ul { list-style: disc; padding-left: 1.5rem; margin: .75rem 0; }
+    .prose strong { color: #fff; }
+    .prose code { color: #fde047; background: #1f1f1f; padding: 1px 6px; border-radius: 4px; font-size: 0.9em; }
+    .prose a { color: #FF0033; }
+    .prose a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body class="text-zinc-100">
+
+  <nav class="sticky top-0 z-50 backdrop-blur-md bg-black/80 border-b border-zinc-900">
+    <div class="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
+      <a href="index.html" class="flex items-center gap-2 font-semibold">
+        <img src="assets/logo.svg" alt="" class="w-7 h-7" />
+        <span>tubemind-secure-mcp</span>
+      </a>
+      <a href="index.html" class="text-sm text-zinc-400 hover:text-white">← Back to home</a>
+    </div>
+  </nav>
+
+  <main class="max-w-3xl mx-auto px-6 py-16 prose">
+    <h1 class="text-4xl font-bold text-white mb-2">Privacy Policy</h1>
+    <p class="text-zinc-500 text-sm">Effective date: 7 May 2026 · Last updated: 7 May 2026</p>
+
+    <h2>1. Who we are</h2>
+    <p><strong>tubemind-secure-mcp</strong> ("the Software") is an open-source Model Context Protocol (MCP) server published by <strong>Dewtech Technologies</strong> ("we", "us") and made available under the MIT License at
+      <a href="https://github.com/dewtech-technologies/tubemind-secure-mcp">github.com/dewtech-technologies/tubemind-secure-mcp</a> and on npm as
+      <code>tubemind-secure-mcp</code>.</p>
+    <p>Contact: <a href="mailto:wleandro.oliveira@gmail.com">wleandro.oliveira@gmail.com</a></p>
+
+    <h2>2. Scope of this policy</h2>
+    <p>This policy describes how the Software handles user data when installed and run <strong>locally on a user's own machine</strong>. We do <strong>not</strong> operate any backend, server, telemetry endpoint or analytics service for the Software. The Software is a standalone tool that runs on your computer and communicates only with Google's official YouTube APIs using credentials you provide.</p>
+
+    <h2>3. Data we do NOT collect</h2>
+    <p>We want to be unambiguous about this:</p>
+    <ul>
+      <li>We do not operate any server that the Software talks to.</li>
+      <li>We do not receive any telemetry, usage metrics or analytics from the Software.</li>
+      <li>We never see your YouTube account, channel, videos, analytics, OAuth tokens or API keys.</li>
+      <li>We do not sell, share, rent or transfer any user data — because we never receive any.</li>
+    </ul>
+
+    <h2>4. Data the Software handles locally on your machine</h2>
+    <p>The Software handles the following data, all of it stored exclusively on your local file system:</p>
+
+    <h3>4.1 Google OAuth credentials</h3>
+    <ul>
+      <li><strong>What:</strong> The OAuth Client ID, Client Secret and access/refresh tokens issued by Google when you authorize the Software to use your YouTube account.</li>
+      <li><strong>Where:</strong> Tokens are persisted to <code>./tokens/youtube.token.json</code> within your project directory. Client ID/Secret are read from environment variables (<code>.env</code> file).</li>
+      <li><strong>Protection:</strong> Tokens at rest are encrypted with <strong>AES-256-GCM</strong> using a 256-bit key (<code>TOKEN_ENCRYPTION_KEY</code>) that you generate locally. The key is never transmitted.</li>
+      <li><strong>Retention:</strong> Until you delete the <code>tokens/</code> directory, revoke access at <a href="https://myaccount.google.com/permissions">myaccount.google.com/permissions</a>, or uninstall the Software.</li>
+    </ul>
+
+    <h3>4.2 Audit log</h3>
+    <ul>
+      <li><strong>What:</strong> A line-per-call log written to a path you configure (default <code>./logs/audit.log</code>) containing: timestamp, tool name, action, success/failure flag.</li>
+      <li><strong>Why:</strong> So you can review which YouTube operations were performed and detect misuse on your own machine.</li>
+      <li><strong>Where:</strong> Local file system only. Never transmitted.</li>
+      <li><strong>Retention:</strong> You manage the file (rotate, delete or archive at any time).</li>
+    </ul>
+
+    <h3>4.3 YouTube data fetched on demand</h3>
+    <ul>
+      <li><strong>What:</strong> Public and private YouTube data (channel analytics, video metadata, search results) fetched from Google's official APIs when an MCP tool is invoked.</li>
+      <li><strong>Where:</strong> Held in process memory only, returned to the MCP client (e.g. Claude Desktop), and discarded when the process exits. Not persisted by the Software.</li>
+    </ul>
+
+    <h2>5. Google API Services User Data Policy compliance</h2>
+    <p>tubemind-secure-mcp's use and transfer to any other app of information received from Google APIs will adhere to the
+      <a href="https://developers.google.com/terms/api-services-user-data-policy">Google API Services User Data Policy</a>, including the Limited Use requirements.</p>
+    <p>Specifically:</p>
+    <ul>
+      <li>We use YouTube data only to provide and improve the user-facing features of the Software (the 18 MCP tools listed at <a href="index.html#tools">tubemind.dewtech.tech</a>).</li>
+      <li>We do not use the data for serving advertisements.</li>
+      <li>We do not transfer or sell the data to third parties.</li>
+      <li>We do not allow humans to read the data unless we have your explicit consent for specific items, the data is needed for security purposes (such as investigating abuse), to comply with applicable law, or for the Software's internal operations and the data is aggregated or anonymized.</li>
+    </ul>
+
+    <h2>6. OAuth scopes used and why</h2>
+    <p>The Software requests the minimum scopes required to deliver its features:</p>
+    <ul>
+      <li><code>youtube.readonly</code> — to read channel and video metadata for analysis tools (<code>get_video_tags</code>, <code>list_channel_videos</code>, <code>get_competitor_videos</code>, search/heuristic tools).</li>
+      <li><code>yt-analytics.readonly</code> — to read your channel's analytics for the analytics and benchmark tools (<code>get_channel_analytics</code>, <code>score_best_publish_window</code>, <code>benchmark_channel</code>).</li>
+      <li><code>youtube</code> — to update titles, descriptions and tags of <strong>your own</strong> videos via <code>update_video_metadata</code>. The Software verifies channel ownership before any write.</li>
+      <li><code>youtube.upload</code> — reserved for future upload features. Not actively used by any current tool.</li>
+    </ul>
+    <p>You can revoke any of these scopes at any time at <a href="https://myaccount.google.com/permissions">myaccount.google.com/permissions</a>.</p>
+
+    <h2>7. Security measures</h2>
+    <ul>
+      <li><strong>AES-256-GCM</strong> encryption for OAuth tokens at rest.</li>
+      <li><strong>SSRF guard:</strong> outbound requests are restricted to the <code>googleapis.com</code> family of hosts.</li>
+      <li><strong>Rate limiting:</strong> per-tool rate limits to protect Google API quota and detect abuse.</li>
+      <li><strong>Input validation:</strong> every MCP tool input is validated with Zod schemas before reaching Google APIs.</li>
+      <li><strong>Audit logging:</strong> every tool call is recorded in a local audit log.</li>
+      <li><strong>Dependency hygiene:</strong> pinned versions, automated <code>pnpm audit</code> in CI, Dependabot enabled.</li>
+    </ul>
+    <p>Full security posture mapped to OWASP Top 10 is published in
+      <a href="https://github.com/dewtech-technologies/tubemind-secure-mcp/blob/main/SECURITY.md">SECURITY.md</a>.</p>
+
+    <h2>8. Children's privacy</h2>
+    <p>The Software is a developer tool not directed at children. We do not knowingly collect any personal information from anyone, including children under 13.</p>
+
+    <h2>9. Changes to this policy</h2>
+    <p>We may update this policy as the Software evolves. Material changes will be reflected here with an updated "Last updated" date and announced in the GitHub repository's release notes.</p>
+
+    <h2>10. Contact</h2>
+    <p>Questions about this policy or the Software's data handling? Email <a href="mailto:wleandro.oliveira@gmail.com">wleandro.oliveira@gmail.com</a>.</p>
+  </main>
+
+  <footer class="border-t border-zinc-900 py-10 mt-16">
+    <div class="max-w-4xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-zinc-500">
+      <div>tubemind-secure-mcp · MIT</div>
+      <div class="flex items-center gap-6">
+        <a href="index.html" class="hover:text-white">Home</a>
+        <a href="terms.html" class="hover:text-white">Terms</a>
+        <a href="https://github.com/dewtech-technologies/tubemind-secure-mcp" class="hover:text-white">GitHub</a>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

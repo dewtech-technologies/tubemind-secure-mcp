@@ -1,0 +1,14 @@
+{
+  "name": "tubemind-secure-mcp",
+  "structure": "mcp-server",
+  "ide": "claude-hybrid",
+  "graphrag": "sqlite",
+  "mcp": true,
+  "version": "2.17.0",
+  "installedAt": "2026-05-24T00:44:36.464Z",
+  "mcpTransport": "stdio",
+  "mcpLanguage": "node-ts",
+  "mcpFeatures": [
+    "tools"
+  ]
+}

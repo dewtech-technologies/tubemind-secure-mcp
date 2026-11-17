@@ -1,0 +1,91 @@
+{
+  "version": 1,
+  "updatedAt": "2026-05-24T06:42:22.571Z",
+  "tasks": {
+    "task-001": {
+      "status": "DONE",
+      "output": "Bootstrap v0.2 OK: 3 deps fixadas (better-sqlite3 11.5.0, anthropic 0.32.1, sharp 0.33.5); 6 envs novas no .env.example; src/index.ts loga versao+cache+llm em stderr; eslint.config.js criado (ESLint 9 flat); fast-uri>=3.1.2 override (CVE HIGH eliminada). Ralph Loop verde.",
+      "duration": 11040
+    },
+    "task-002": {
+      "status": "DONE",
+      "output": "Schema SQLite OK: migrations.service.ts com 3 migrations inline (cache_entries + quota_log + 8 indexes), WAL+synchronous NORMAL+auto_vacuum INCREMENTAL, integrity_check, chmod 600 Unix, path traversal guard, recoverCorruptedDatabase. 14 testes (1 skipped chmod Windows). Ralph Loop verde.",
+      "duration": 10490
+    },
+    "task-003": {
+      "status": "DONE",
+      "output": "Cache Service OK: cache.service.ts (computeCacheKey SHA-256, get/set/bypass/withCache/evictLRU/stats com isolamento por token), db.service.ts (singleton lazy + fail-soft), cache.config.ts (TTLs por tool + LRU 100MB), hash.ts (sha256), SSRF guard expandido (ytimg + ggpht + googleusercontent + anthropic), audit actions ampliados. 18 testes novos. Ralph Loop verde.",
+      "duration": 11772
+    },
+    "task-004": {
+      "status": "DONE",
+      "output": "Batch optimization OK: getVideosByIdsBatched (chunks de 50, regex preventivo, ordem preservada, cache + quota tracking integrado), refactor de 7 ocorrencias (heuristic.tool 3 + heuristic-advanced.tool 3 + search.tool 1 — bonus alem do spec). 11 testes integracao. Ralph Loop verde — 75 testes totais.",
+      "duration": 11442
+    },
+    "task-005": {
+      "status": "DONE",
+      "output": "Quota tracker OK: quota.service.ts (recordQuota, getUsage, checkThresholds), quota.tool.ts (get_quota_usage com markdown), youtube-quota-costs.ts canonical, tool registrada no router. 15 testes (isolamento por token, periods, thresholds, fail-soft). Integração automática em youtube.service fica em task-004 (refactor batch). Ralph Loop verde.",
+      "duration": 12098
+    },
+    "task-006": {
+      "status": "DONE",
+      "output": "Vision base OK: anthropic.service (lazy SDK + callVision/callText + cost tracking), thumbnail-fetcher (SSRF + 5MB + EXIF strip via sharp), budget-guard (3 caps), vision-rate-limiter (20/min), prompt FIXO. 25 testes. Lint: fetch como global ESLint corrigido.",
+      "duration": 12464
+    },
+    "task-007": {
+      "status": "DONE",
+      "output": "Vision Tools OK: vision.service (analyzeThumbnails orchestra fetch+anthropic+parse+cache, scoreThumbnail compara vs baseline com alinhamento + 3 improvements), vision.tool (2 tools com pre-flight cost + fallback gracioso sem ANTHROPIC_API_KEY + markdown renderers ricos). 8 testes (schemas + fallback). Ralph Loop verde.",
+      "duration": 12705
+    },
+    "task-008": {
+      "status": "DONE",
+      "output": "Sanitizer + PII + Red Team OK: prompt-sanitizer.service (wrapComments/wrapText/sanitizeBody com XML escape + ANSI strip + truncamento), pii-filter.service (email/telefone-BR/CPF/CNPJ/CEP redaction), output.schemas.ts (Vision/NLP/Script schemas com refine() de leakage detection). 28 testes novos: 20/20 red team adversarial neutralizados + PII redaction completa. Ralph Loop verde — 139 testes totais.",
+      "duration": 15245
+    },
+    "task-009": {
+      "status": "DONE",
+      "output": "NLP analyze_video_comments OK: nlp.service (fetchComments com pagination + handle commentsDisabled, analyzeComments com PII filter + sanitizer wrapper + Claude Haiku + parse JSON com hasLeakageMarkers + Zod validation + cache 24h), nlp.tool (handler + fallback gracioso + markdown rico). Registrado no router. Ralph Loop verde.",
+      "duration": 12832
+    },
+    "task-010": {
+      "status": "DONE",
+      "output": "NLP analyze_video_transcript OK: srt-parser inline (SRT/VTT, BOM strip, multi-line), listCaptions/downloadCaption em youtube.service com quota tracking, analyzeTranscript usa Sonnet 4.6 com truncamento 30k chars, NLPTranscriptOutputSchema validation. Tool registrada. Fallback graceful sem captions disponíveis. Ralph Loop verde.",
+      "duration": 12619
+    },
+    "task-011": {
+      "status": "DONE",
+      "output": "Reverse Engineering Viral Video OK: prompt FIXO, reverseEngineerViralVideo orquestra Promise.all(comments + transcript + thumbnail) com cache, gera markdown unificado via Sonnet. Tool registrada com pre-flight + header rico. Ralph Loop verde.",
+      "duration": 12819
+    },
+    "task-012": {
+      "status": "DONE",
+      "output": "Script Generator OK: pipeline.service.generateScript usa Sonnet 4.6 com contexto cached (retention + title patterns) + validator de qualidade (rejeita roteiros com poucos keyword matches), ScriptOutputSchema, prompt FIXO. Tool registrada.",
+      "duration": 13024
+    },
+    "task-013": {
+      "status": "DONE",
+      "output": "Description Optimizer OK: pipeline.service.optimizeDescription Haiku 4.5 + DescriptionOutputSchema + regulated-niche-detector (financeiro/medico/juridico) com disclaimers + keyword density check. Tool registrada.",
+      "duration": 14635
+    },
+    "task-014": {
+      "status": "DONE",
+      "output": "Predictor OK: predictPerformance com fórmula explícita (ctr 30% + thumb 25% + retention 25% + timing 10% + niche 10%), schema .strict() (anti-tampering RS-4.10), disclaimer mandatório, views 7d/30d/90d com faixa, top 5 ajustes. Tool registrada.",
+      "duration": 13560
+    },
+    "task-015": {
+      "status": "DONE",
+      "output": "Workflows OK: WORKFLOW_REGISTRY com 4 workflows (launch_new_channel, revive_dead_channel, weekly_planning, competitor_takedown), runWorkflow executor sequencial com falha graceful + auditLog WORKFLOW_STEP por step + budget guard. Tool registrada — 28 tools totais no router agora.",
+      "duration": 12705
+    },
+    "task-016": {
+      "status": "DONE",
+      "output": "Security audit OK: pnpm audit limpo (0 HIGH/CRITICAL), versões fixadas, SECURITY.md atualizado mapeando 37 RSs, .gitleaks.toml + GitHub Action security.yml.",
+      "duration": 14186
+    },
+    "task-017": {
+      "status": "DONE",
+      "output": "Docs Final OK: CHANGELOG.md v0.2.0 (Keep a Changelog), docs/audit-log-schema.md, version 0.2.0. 28 tools no router. Ready para release npm + Smithery.",
+      "duration": 15820
+    }
+  }
+}

@@ -2,6 +2,7 @@ import { appendFile, mkdir } from 'fs/promises'
 import { dirname } from 'path'
 
 export type AuditAction =
+  // v0.1 tools
   | 'SEARCH_TRENDING'
   | 'GET_KEYWORD_STATS'
   | 'GET_VIDEO_TAGS'
@@ -24,6 +25,42 @@ export type AuditAction =
   | 'OAUTH_CALLBACK'
   | 'TOKEN_REFRESH'
   | 'TOKEN_REVOKE'
+  // v0.2 Camada 1 — Cache + Quota
+  | 'CACHE_HIT'
+  | 'CACHE_MISS'
+  | 'CACHE_BYPASS'
+  | 'CACHE_EVICT'
+  | 'CACHE_INIT_FAILED'
+  | 'QUOTA_RECORD'
+  | 'QUOTA_THRESHOLD_70'
+  | 'QUOTA_THRESHOLD_90'
+  | 'GET_QUOTA_USAGE'
+  | 'YOUTUBE_BATCH_FETCH'
+  // v0.2 Camada 2 — Vision
+  | 'VISION_API_CALL'
+  | 'ANALYZE_THUMBNAIL_VISUALS'
+  | 'SCORE_MY_THUMBNAIL'
+  // v0.2 Camada 3 — NLP
+  | 'NLP_LLM_CALL'
+  | 'ANALYZE_VIDEO_COMMENTS'
+  | 'ANALYZE_VIDEO_TRANSCRIPT'
+  | 'REVERSE_ENGINEER_VIRAL_VIDEO'
+  // v0.2 Camada 4 — Pipeline
+  | 'GENERATE_FULL_SCRIPT'
+  | 'OPTIMIZE_VIDEO_DESCRIPTION'
+  | 'PREDICT_VIDEO_PERFORMANCE'
+  | 'RUN_WORKFLOW'
+  | 'WORKFLOW_STEP'
+  // v0.3 — Dados (paridade)
+  | 'GET_CHANNEL_DETAILS'
+  | 'LIST_CHANNEL_PLAYLISTS'
+  | 'GET_PLAYLIST_ITEMS'
+  | 'GET_VIDEO_DETAILS'
+  | 'GET_TRENDING_VIDEOS'
+  | 'LIST_VIDEO_COMMENTS'
+  | 'LIST_COMMENT_REPLIES'
+  | 'BATCH_LOOKUP'
+  | 'RESOLVE_YOUTUBE_URL'
 
 interface AuditEntry {
   timestamp: string
