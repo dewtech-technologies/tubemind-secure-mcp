@@ -180,7 +180,8 @@ export type GenerateContentCalendarInput = z.infer<typeof GenerateContentCalenda
 
 const VideoIdField = z.string().regex(/^[a-zA-Z0-9_-]{11}$/, 'ID de vídeo inválido')
 const ChannelIdField = z.string().regex(/^UC[a-zA-Z0-9_-]{22}$/, 'Channel ID inválido (deve começar com UC)')
-const PageTokenField = z.string().regex(/^[a-zA-Z0-9_-]{1,200}$/, 'pageToken inválido').optional()
+// Tokens do YouTube são base64 URL-safe; os de comentários passam de 300 chars e podem ter padding "="
+const PageTokenField = z.string().regex(/^[a-zA-Z0-9_=-]{1,1000}$/, 'pageToken inválido').optional()
 // Referência a canal: UC..., @handle ou URL do YouTube (validação fina em toChannelRef)
 const ChannelInputField = z.string().min(3).max(300).transform(s => s.trim())
 
