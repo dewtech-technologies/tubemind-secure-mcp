@@ -51,6 +51,16 @@ export type AuditAction =
   | 'PREDICT_VIDEO_PERFORMANCE'
   | 'RUN_WORKFLOW'
   | 'WORKFLOW_STEP'
+  // v0.3 — Dados (paridade)
+  | 'GET_CHANNEL_DETAILS'
+  | 'LIST_CHANNEL_PLAYLISTS'
+  | 'GET_PLAYLIST_ITEMS'
+  | 'GET_VIDEO_DETAILS'
+  | 'GET_TRENDING_VIDEOS'
+  | 'LIST_VIDEO_COMMENTS'
+  | 'LIST_COMMENT_REPLIES'
+  | 'BATCH_LOOKUP'
+  | 'RESOLVE_YOUTUBE_URL'
 
 interface AuditEntry {
   timestamp: string

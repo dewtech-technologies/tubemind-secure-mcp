@@ -12,6 +12,7 @@ export const QUOTA_COSTS: Readonly<Record<string, number>> = Object.freeze({
   'youtube:videos.list': 1,
   'youtube:channels.list': 1,
   'youtube:commentThreads.list': 1,
+  'youtube:comments.list': 1,
   'youtube:captions.list': 50,
   'youtube:captions.download': 200,
   'youtube:videos.update': 50,

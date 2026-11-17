@@ -175,3 +175,62 @@ export type SuggestHookAnglesInput = z.infer<typeof SuggestHookAnglesSchema>
 export type FindTrendingKeywordsInput = z.infer<typeof FindTrendingKeywordsSchema>
 export type AnalyzeRetentionSignalsInput = z.infer<typeof AnalyzeRetentionSignalsSchema>
 export type GenerateContentCalendarInput = z.infer<typeof GenerateContentCalendarSchema>
+
+// ─── Paridade de dados (channel / playlist / video / comments / batch) ────────
+
+const VideoIdField = z.string().regex(/^[a-zA-Z0-9_-]{11}$/, 'ID de vídeo inválido')
+const ChannelIdField = z.string().regex(/^UC[a-zA-Z0-9_-]{22}$/, 'Channel ID inválido (deve começar com UC)')
+const PageTokenField = z.string().regex(/^[a-zA-Z0-9_-]{1,200}$/, 'pageToken inválido').optional()
+// Referência a canal: UC..., @handle ou URL do YouTube (validação fina em toChannelRef)
+const ChannelInputField = z.string().min(3).max(300).transform(s => s.trim())
+
+export const GetChannelDetailsSchema = z.object({
+  channel: ChannelInputField,
+})
+
+export const ListChannelPlaylistsSchema = z.object({
+  channel: ChannelInputField,
+  maxResults: z.number().int().min(1).max(50).default(25),
+  pageToken: PageTokenField,
+})
+
+export const GetPlaylistItemsSchema = z.object({
+  playlistId: z.string().regex(/^(PL|UU|LL|FL|OL|RD)[a-zA-Z0-9_-]{10,64}$/, 'Playlist ID inválido'),
+  maxResults: z.number().int().min(1).max(50).default(25),
+  pageToken: PageTokenField,
+})
+
+export const GetVideoDetailsSchema = z.object({
+  videoId: VideoIdField,
+})
+
+export const GetTrendingVideosSchema = z.object({
+  regionCode: z.string().regex(/^[A-Z]{2}$/, 'Código de região ISO 3166-1 alpha-2 (ex: BR)').default('BR'),
+  categoryId: z.string().regex(/^\d{1,3}$/, 'categoryId numérico').optional(),
+  maxResults: z.number().int().min(1).max(50).default(20),
+  pageToken: PageTokenField,
+})
+
+export const ListVideoCommentsSchema = z.object({
+  videoId: VideoIdField,
+  maxResults: z.number().int().min(1).max(100).default(20),
+  order: z.enum(['relevance', 'time']).default('relevance'),
+  searchTerms: SafeString(100).optional(),
+  pageToken: PageTokenField,
+})
+
+export const ListCommentRepliesSchema = z.object({
+  commentId: z.string().regex(/^[a-zA-Z0-9_.-]{10,100}$/, 'commentId inválido'),
+  maxResults: z.number().int().min(1).max(100).default(20),
+  pageToken: PageTokenField,
+})
+
+export const BatchLookupSchema = z.discriminatedUnion('type', [
+  z.object({ type: z.literal('videos'), ids: z.array(VideoIdField).min(1).max(50) }),
+  z.object({ type: z.literal('channels'), ids: z.array(ChannelIdField).min(1).max(50) }),
+])
+
+export const ResolveYouTubeUrlSchema = z.object({
+  url: z.string().min(3).max(500).transform(s => s.trim()),
+  resolveHandle: z.boolean().default(true),
+})

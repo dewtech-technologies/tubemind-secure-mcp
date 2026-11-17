@@ -107,6 +107,30 @@ import {
   runWorkflow,
 } from './tools/pipeline.tool.js'
 
+// v0.3 — Tools de dados (paridade: canal, playlist, vídeo, comentários, lote)
+import {
+  getChannelDetailsDefinition,
+  getChannelDetails,
+  listChannelPlaylistsDefinition,
+  listChannelPlaylists,
+  getPlaylistItemsDefinition,
+  getPlaylistItems,
+  batchLookupDefinition,
+  batchLookup,
+  resolveYouTubeUrlDefinition,
+  resolveYouTubeUrl,
+} from './tools/channel-data.tool.js'
+import {
+  getVideoDetailsDefinition,
+  getVideoDetails,
+  getTrendingVideosDefinition,
+  getTrendingVideos,
+  listVideoCommentsDefinition,
+  listVideoComments,
+  listCommentRepliesDefinition,
+  listCommentReplies,
+} from './tools/video-data.tool.js'
+
 // ─── Server ───────────────────────────────────────────────────────────────────
 
 const VERSION = '0.2.0'
@@ -157,6 +181,16 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
     optimizeVideoDescriptionDefinition,
     predictVideoPerformanceDefinition,
     runWorkflowDefinition,
+    // v0.3 Dados
+    getChannelDetailsDefinition,
+    listChannelPlaylistsDefinition,
+    getPlaylistItemsDefinition,
+    getVideoDetailsDefinition,
+    getTrendingVideosDefinition,
+    listVideoCommentsDefinition,
+    listCommentRepliesDefinition,
+    batchLookupDefinition,
+    resolveYouTubeUrlDefinition,
   ],
 }))
 
@@ -258,6 +292,34 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         break
       case 'reverse_engineer_viral_video':
         result = await reverseEngineerViralVideoHandler(args, accessToken)
+        break
+      // v0.3 Dados
+      case 'get_channel_details':
+        result = await getChannelDetails(args, accessToken)
+        break
+      case 'list_channel_playlists':
+        result = await listChannelPlaylists(args, accessToken)
+        break
+      case 'get_playlist_items':
+        result = await getPlaylistItems(args, accessToken)
+        break
+      case 'get_video_details':
+        result = await getVideoDetails(args, accessToken)
+        break
+      case 'get_trending_videos':
+        result = await getTrendingVideos(args, accessToken)
+        break
+      case 'list_video_comments':
+        result = await listVideoComments(args, accessToken)
+        break
+      case 'list_comment_replies':
+        result = await listCommentReplies(args, accessToken)
+        break
+      case 'batch_lookup':
+        result = await batchLookup(args, accessToken)
+        break
+      case 'resolve_youtube_url':
+        result = await resolveYouTubeUrl(args, accessToken)
         break
       // v0.2 Camada 4
       case 'generate_full_script':

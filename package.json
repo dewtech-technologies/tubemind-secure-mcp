@@ -2,7 +2,7 @@
   "name": "tubemind-secure-mcp",
   "mcpName": "io.github.dewtech-technologies/tubemind-secure-mcp",
   "version": "0.2.0",
-  "description": "Secure Model Context Protocol server for YouTube intelligence — 28 tools (search, analytics, benchmark, heuristics, competitor, vision, NLP, pipeline) powered by YouTube Data API v3 + Analytics API + Claude Vision/Sonnet, OAuth2 (Brand Account support), AES-256-GCM token encryption, OWASP Top 10 controls, SQLite cache.",
+  "description": "Secure Model Context Protocol server for YouTube intelligence — 37 tools (search, analytics, benchmark, heuristics, competitor, vision, NLP, pipeline, channel/playlist/video/comment data) powered by YouTube Data API v3 + Analytics API + Claude Vision/Sonnet, OAuth2 (Brand Account support), AES-256-GCM token encryption, OWASP Top 10 controls, SQLite cache.",
   "type": "module",
   "main": "dist/index.js",
   "bin": {

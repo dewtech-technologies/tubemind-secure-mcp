@@ -38,6 +38,17 @@ export const CACHE_TTL: Readonly<Record<string, number>> = Object.freeze({
   // ── Batch fetch interno (videos.list batched) ──
   videos_batch: 21600, // 6h — reuso em múltiplas heurísticas
 
+  // ── v0.3 Dados (paridade) ──
+  get_channel_details: 21600, // 6h
+  list_channel_playlists: 21600, // 6h
+  get_playlist_items: 3600, // 1h
+  get_video_details: 3600, // 1h (views mudam)
+  get_trending_videos: 1800, // 30min (chart muda rápido)
+  list_video_comments: 3600, // 1h
+  list_comment_replies: 3600, // 1h
+  channels_batch: 21600, // 6h
+  resolve_handle: 604800, // 7d (handle → UC raramente muda)
+
   // ── Camada 2 — Visão (caro: Claude Vision API) ──
   analyze_thumbnail_visuals: 604800, // 7d (thumbnails de top vídeos mudam pouco)
   score_my_thumbnail: 86400, // 24h
