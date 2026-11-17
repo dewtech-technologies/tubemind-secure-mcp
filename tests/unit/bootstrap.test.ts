@@ -23,8 +23,8 @@ describe('Bootstrap v0.2 — task-001', () => {
       expect(pkg.dependencies['@anthropic-ai/sdk']).toBe('0.32.1')
     })
 
-    it('should_have_sharp_pinned_to_0_33_5', () => {
-      expect(pkg.dependencies['sharp']).toBe('0.33.5')
+    it('should_have_sharp_pinned_to_0_35_5', () => {
+      expect(pkg.dependencies['sharp']).toBe('0.35.5')
     })
 
     it('should_have_types_better_sqlite3_in_devDependencies', () => {
@@ -32,9 +32,9 @@ describe('Bootstrap v0.2 — task-001', () => {
     })
 
     it('should_keep_existing_v01_deps_unchanged', () => {
-      expect(pkg.dependencies['@modelcontextprotocol/sdk']).toBe('1.26.0')
+      expect(pkg.dependencies['@modelcontextprotocol/sdk']).toBe('1.32.2')
       expect(pkg.dependencies['googleapis']).toBe('171.4.0')
-      expect(pkg.dependencies['zod']).toBe('3.25.28')
+      expect(pkg.dependencies['zod']).toBe('4.6.7')
     })
   })
 
