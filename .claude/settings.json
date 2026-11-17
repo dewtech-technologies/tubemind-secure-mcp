@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git:*)",
+      "Bash(pnpm build)",
+      "Bash(pnpm test)",
+      "Bash(pnpm lint)",
+      "Bash(pnpm typecheck)",
+      "Bash(pnpm audit:security)",
+      "Read(DARE/**)",
+      "Write(DARE/**)",
+      "Read(src/**)",
+      "Write(src/**)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo \"File saved. Remember to run Ralph Loop: pnpm build && pnpm test && pnpm lint && pnpm audit:security\""
+          }
+        ]
+      }
+    ]
+  }
+}

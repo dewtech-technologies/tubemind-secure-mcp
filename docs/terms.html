@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Terms of Service — tubemind-secure-mcp</title>
+  <meta name="description" content="Terms of Service for tubemind-secure-mcp." />
+  <link rel="icon" type="image/svg+xml" href="assets/logo.svg" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    body { background: #0a0a0a; font-family: 'Inter', system-ui, sans-serif; }
+    .prose h2 { color: #fff; font-size: 1.5rem; font-weight: 700; margin-top: 2.5rem; margin-bottom: 1rem; }
+    .prose h3 { color: #fff; font-size: 1.15rem; font-weight: 600; margin-top: 2rem; margin-bottom: .5rem; }
+    .prose p, .prose li { color: #a1a1aa; line-height: 1.7; }
+    .prose ul { list-style: disc; padding-left: 1.5rem; margin: .75rem 0; }
+    .prose strong { color: #fff; }
+    .prose code { color: #fde047; background: #1f1f1f; padding: 1px 6px; border-radius: 4px; font-size: 0.9em; }
+    .prose a { color: #FF0033; }
+    .prose a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body class="text-zinc-100">
+
+  <nav class="sticky top-0 z-50 backdrop-blur-md bg-black/80 border-b border-zinc-900">
+    <div class="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
+      <a href="index.html" class="flex items-center gap-2 font-semibold">
+        <img src="assets/logo.svg" alt="" class="w-7 h-7" />
+        <span>tubemind-secure-mcp</span>
+      </a>
+      <a href="index.html" class="text-sm text-zinc-400 hover:text-white">← Back to home</a>
+    </div>
+  </nav>
+
+  <main class="max-w-3xl mx-auto px-6 py-16 prose">
+    <h1 class="text-4xl font-bold text-white mb-2">Terms of Service</h1>
+    <p class="text-zinc-500 text-sm">Effective date: 7 May 2026 · Last updated: 7 May 2026</p>
+
+    <h2>1. Acceptance</h2>
+    <p>By installing, running or otherwise using <strong>tubemind-secure-mcp</strong> ("the Software"), you agree to be bound by these Terms of Service ("Terms") and by the <a href="privacy.html">Privacy Policy</a>. If you do not agree, do not use the Software.</p>
+
+    <h2>2. License</h2>
+    <p>The Software is open-source and licensed under the <strong>MIT License</strong>. The full license text is available in the GitHub repository at
+      <a href="https://github.com/dewtech-technologies/tubemind-secure-mcp/blob/main/LICENSE">LICENSE</a>.</p>
+    <p>You may freely use, copy, modify, merge, publish, distribute and sublicense the Software, subject to the terms of the MIT License.</p>
+
+    <h2>3. What the Software does</h2>
+    <p>The Software is a Model Context Protocol (MCP) server. When connected to an MCP-compatible client such as Anthropic's Claude Desktop, it exposes 18 tools that interact with the official YouTube Data API v3 and YouTube Analytics API on behalf of the user, using OAuth credentials supplied by the user.</p>
+    <p>The Software runs entirely on the user's machine. Dewtech Technologies ("we") does not operate any backend, server or hosted service for the Software.</p>
+
+    <h2>4. Your responsibilities</h2>
+    <p>You are solely responsible for:</p>
+    <ul>
+      <li>Creating and maintaining your own Google Cloud project, OAuth Client ID and OAuth Client Secret used by the Software.</li>
+      <li>Complying with the <a href="https://developers.google.com/youtube/terms/api-services-terms-of-service">YouTube API Services Terms of Service</a>, the <a href="https://www.youtube.com/t/terms">YouTube Terms of Service</a>, and the <a href="https://developers.google.com/terms/api-services-user-data-policy">Google API Services User Data Policy</a>.</li>
+      <li>Respecting all applicable laws and regulations, including data protection, copyright and intellectual property laws, in your use of YouTube data accessed through the Software.</li>
+      <li>Securing your credentials. The Software encrypts OAuth tokens at rest with AES-256-GCM, but you must protect your <code>.env</code> file, your <code>TOKEN_ENCRYPTION_KEY</code> and your machine.</li>
+      <li>Monitoring your YouTube API quota and rate limits.</li>
+      <li>Reviewing the Software's audit log on your own machine.</li>
+    </ul>
+
+    <h2>5. Acceptable use</h2>
+    <p>You agree not to use the Software:</p>
+    <ul>
+      <li>To violate any law or regulation.</li>
+      <li>To infringe any intellectual property right.</li>
+      <li>To send spam, unsolicited messages or harvest data in bulk in violation of YouTube's Terms.</li>
+      <li>To attempt to bypass YouTube API rate limits or to evade quota enforcement.</li>
+      <li>To impersonate any person or entity.</li>
+      <li>To compromise the security of any system, including the Software itself.</li>
+    </ul>
+    <p>We reserve the right to disable any OAuth client we control, refuse contributions, or remove access to ancillary services (e.g., the documentation site) for users who violate these Terms.</p>
+
+    <h2>6. Third-party services</h2>
+    <p>The Software relies on third-party services controlled by Google, including the YouTube Data API v3 and YouTube Analytics API. Use of those services is governed by Google's terms, not ours. The Software is not endorsed by, sponsored by, or affiliated with Google or YouTube.</p>
+
+    <h2>7. No warranty</h2>
+    <p>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. WE DO NOT WARRANT THAT THE SOFTWARE WILL BE UNINTERRUPTED, ERROR-FREE OR FREE OF HARMFUL COMPONENTS, OR THAT IT WILL MEET YOUR REQUIREMENTS.</p>
+
+    <h2>8. Limitation of liability</h2>
+    <p>TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT WILL DEWTECH TECHNOLOGIES OR ANY CONTRIBUTOR TO THE SOFTWARE BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL OR PUNITIVE DAMAGES, OR ANY LOSS OF PROFITS, REVENUE, DATA, OR GOODWILL, ARISING OUT OF OR IN CONNECTION WITH YOUR USE OF (OR INABILITY TO USE) THE SOFTWARE, WHETHER BASED ON WARRANTY, CONTRACT, TORT (INCLUDING NEGLIGENCE), STRICT LIABILITY OR ANY OTHER LEGAL THEORY, AND WHETHER OR NOT WE HAVE BEEN INFORMED OF THE POSSIBILITY OF SUCH DAMAGE.</p>
+
+    <h2>9. Indemnity</h2>
+    <p>You agree to indemnify and hold harmless Dewtech Technologies and the Software's contributors from and against any claims, damages, losses, liabilities, costs and expenses (including reasonable attorneys' fees) arising out of or related to your use of the Software, your violation of these Terms, or your violation of any third-party right (including any intellectual property right or YouTube/Google terms).</p>
+
+    <h2>10. Termination</h2>
+    <p>You may stop using the Software at any time by uninstalling it and revoking OAuth access at <a href="https://myaccount.google.com/permissions">myaccount.google.com/permissions</a>. We may, at our discretion, cease distributing the Software, deprecate features, or release new versions with breaking changes — although the source code as published under the MIT License remains available subject to that license.</p>
+
+    <h2>11. Changes to these Terms</h2>
+    <p>We may update these Terms as the Software evolves. Material changes will be reflected here with an updated "Last updated" date and announced in the GitHub repository's release notes. Your continued use of the Software after changes are posted constitutes acceptance of the updated Terms.</p>
+
+    <h2>12. Governing law</h2>
+    <p>These Terms shall be governed by and construed in accordance with the laws of <strong>Brazil</strong>, without regard to its conflict-of-law provisions. Any dispute arising out of or related to these Terms or the Software shall be subject to the exclusive jurisdiction of the courts located in <strong>Belo Horizonte, Minas Gerais, Brazil</strong>.</p>
+
+    <h2>13. Contact</h2>
+    <p>Questions about these Terms? Email <a href="mailto:wleandro.oliveira@gmail.com">wleandro.oliveira@gmail.com</a>.</p>
+  </main>
+
+  <footer class="border-t border-zinc-900 py-10 mt-16">
+    <div class="max-w-4xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-zinc-500">
+      <div>tubemind-secure-mcp · MIT</div>
+      <div class="flex items-center gap-6">
+        <a href="index.html" class="hover:text-white">Home</a>
+        <a href="privacy.html" class="hover:text-white">Privacy</a>
+        <a href="https://github.com/dewtech-technologies/tubemind-secure-mcp" class="hover:text-white">GitHub</a>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

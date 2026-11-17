@@ -1,0 +1,295 @@
+title: "Tubemind v0.2 - MCP Server Tasks"
+version: "1.0.0"
+generated: "2026-05-23T00:00:00.000Z"
+
+# Runner principal: Claude Code (Opus 4.7 plan / Sonnet 4.6 / Haiku 4.5)
+# Justificativa: este projeto é um MCP server stdio sem UI web. Tooling Claude
+# Code (Read, Edit, Write, Grep, Bash, subagents) cobre 100% do que cada task
+# precisa. Cursor / Antigravity ficam disponíveis no schema do DARE para suporte
+# futuro, mas a execução planejada é toda no Claude Code.
+limits:
+  parent_context_chars: 2000   # snippet de output de cada pai injetado no filho
+  task_output_chars: 4000      # cap do output capturado por task
+  timeout_seconds: 900         # AbortController por task (15 min — algumas envolvem LLM longo)
+
+# Mapeamento complexity → modelo, por runner
+models:
+  claude:      { HIGH: claude-sonnet-4-6, MED: claude-haiku-4-5, LOW: claude-haiku-4-5 }
+  cursor:      { HIGH: gpt-5.3-codex,     MED: composer-2,       LOW: auto-low }
+  antigravity: { HIGH: gemini-2.5-pro,    MED: gemini-2.5-flash, LOW: gemini-2.5-flash }
+
+tasks:
+  - id: task-001
+    title: "Bootstrap v0.2: deps + envs + verificação"
+    depends_on: []
+    complexity: LOW
+    spec_file: EXECUTION/task-001.md
+    subtask_prompt: |
+      Adicione 3 deps novas: better-sqlite3@11.5.0, @anthropic-ai/sdk@0.32.1,
+      sharp@0.33.5 + devDep @types/better-sqlite3. Bump package.json para
+      0.2.0-alpha.0. Atualize .env.example com 6 novas envs (TUBEMIND_CACHE_PATH,
+      TUBEMIND_CACHE_ENABLED, ANTHROPIC_API_KEY, VISION_DAILY_BUDGET_USD,
+      NLP_DAILY_BUDGET_USD, WORKFLOW_DAILY_BUDGET_USD). Adicione log de boot
+      identificando v0.2 em src/index.ts (stderr — stdout reservado para MCP).
+      Importações lazy: anthropic + sharp não podem crashar startup sem envs.
+      NÃO INCLUI Docker — Tubemind é MCP stdio via npx; Docker será da plataforma
+      Rails GCP em projeto separado.
+      Validation gate (Ralph Loop): pnpm install --frozen-lockfile + pnpm build
+      + pnpm test + pnpm lint + pnpm audit todos verdes; node dist/index.js
+      arranca sem crash; npx tubemind-secure-mcp continua funcional em Claude
+      Desktop (regressão zero).
+
+  - id: task-002
+    title: "Schema SQLite + migrations (cache_entries + quota_log)"
+    depends_on: []
+    complexity: MED
+    spec_file: EXECUTION/task-002.md
+    subtask_prompt: |
+      Implemente as 3 migrations SQL (cache_entries, quota_log, indexes) em
+      src/cache/migrations/*.sql e o migrations.service.ts idempotente que roda
+      no boot do MCP. WAL mode + synchronous NORMAL + auto_vacuum INCREMENTAL.
+      Path padrão ~/.tubemind/cache.db com chmod 600 (Unix) / ACL Windows.
+      PRAGMA integrity_check no boot — se falhar, recria DB.
+      Validation gate: migrations rodam em DB temp; integridade passa; testes
+      validam constraints + índices criados.
+
+  - id: task-003
+    title: "Cache Service (get/set/bypass/LRU evict)"
+    depends_on: [task-002]
+    complexity: HIGH
+    spec_file: EXECUTION/task-003.md
+    subtask_prompt: |
+      Implemente src/services/cache.service.ts com API completa: cacheGet,
+      cacheSet, cacheBypass (fresh=true), cacheEvictLRU, cacheStats. Chave
+      SHA-256(tool + paramsJSON + token_hash + tubemind_version). TTL por
+      tool via src/config/cache.config.ts. Wrapper genérico withCache(toolName,
+      params, fetcher). Falha graceful se SQLite indisponível (log WARN, retorna
+      null em get / no-op em set). Expanda src/security/ssrf-guard para incluir
+      *.ytimg.com (uso futuro Camada 2).
+      Validation gate: cache hit 2ª chamada < 100ms; LRU libera bytes corretos
+      em teste de stress; isolation por token verificado.
+
+  - id: task-004
+    title: "Batch optimization (getVideosByIdsBatched + refactor 6 tools)"
+    depends_on: [task-003]
+    complexity: MED
+    spec_file: EXECUTION/task-004.md
+    subtask_prompt: |
+      Adicione getVideosByIdsBatched(client, ids[]) em src/services/youtube.service.ts:
+      valida IDs (regex /^[a-zA-Z0-9_-]{11}$/), chunks de 50, preserva ordem,
+      logga 1 quota unit por chunk. Refactor 6 tools v0.1 substituindo
+      Promise.all(ids.map(getVideoById)): heuristic.tool.ts (3 ocorrências) e
+      heuristic-advanced.tool.ts (3 ocorrências). Backward compat: nenhuma
+      mudança de assinatura MCP. Snapshots v0.1 devem passar inalterados.
+      Validation gate: benchmark mostra ≥ 80% redução de quota em
+      analyze_title_patterns (30 vídeos = 30u → 1u).
+
+  - id: task-005
+    title: "Quota Tracker + tool get_quota_usage"
+    depends_on: [task-003]
+    complexity: MED
+    spec_file: EXECUTION/task-005.md
+    subtask_prompt: |
+      Implemente src/services/quota.service.ts com tracking persistente em quota_log.
+      Tabela canonical de custos em src/config/youtube-quota-costs.ts (search.list=100,
+      videos.list=1, channels.list=1, commentThreads.list=1, captions.download=200).
+      Reset diário à meia-noite via check on-demand. Threshold warnings: WARN 70%,
+      ERROR 90% (tags QUOTA_THRESHOLD_70, QUOTA_THRESHOLD_90 no audit log).
+      Nova tool get_quota_usage(period: 'today'|'week'|'month') em src/tools/quota.tool.ts.
+      Integração: cada chamada YouTube registra automaticamente.
+      Validation gate: tool retorna dados em DB populada; thresholds disparam em testes
+      com clock mockado.
+
+  - id: task-006
+    title: "Vision Service + Thumbnail Fetcher + Budget/Rate Guards"
+    depends_on: [task-003]
+    complexity: HIGH
+    spec_file: EXECUTION/task-006.md
+    subtask_prompt: |
+      Implemente: src/services/anthropic.service.ts (wrapper SDK + cost tracking via
+      tabela vision-pricing.ts), src/services/vision.service.ts (orquestra Claude Vision),
+      src/services/thumbnail-fetcher.service.ts (SSRF guard whitelist *.ytimg.com,
+      max 5MB, Content-Type image/*, strip EXIF via sharp().rotate().jpeg({quality:90})),
+      src/security/vision-rate-limiter.service.ts (max 20 imagens/min por token),
+      src/security/budget-guard.service.ts (cap VISION_DAILY_BUDGET_USD bloqueia),
+      src/prompts/vision-thumbnail.prompt.ts (prompt FIXO — texto na imagem como DADO).
+      Validation gate: ssrf-vision.test.ts rejeita URLs maliciosas; pii-leak.test.ts
+      confirma EXIF removido; mock de Claude Vision funcional.
+
+  - id: task-007
+    title: "Vision Tools: analyze_thumbnail_visuals + score_my_thumbnail"
+    depends_on: [task-006]
+    complexity: HIGH
+    spec_file: EXECUTION/task-007.md
+    subtask_prompt: |
+      Implemente src/tools/vision.tool.ts com as 2 tools. Schemas Zod em input.schemas.ts:
+      AnalyzeThumbnailVisualsSchema (niche, regionCode=BR, maxThumbs ∈ [3,20]=15, fresh=false),
+      ScoreMyThumbnailSchema (discriminated union url|base64, niche, regionCode).
+      Output markdown rico (ver BLUEPRINT seção 5.2): análise individual + agregada por
+      nicho + recomendação textual concreta. Cache 7 dias reusando Camada 1.
+      Pre-flight de custo: "Estimativa: $X.XX para N thumbs".
+      Fallback gracioso sem ANTHROPIC_API_KEY: "Camada 2 requer ANTHROPIC_API_KEY".
+      Validation gate: vision-end-to-end.test.ts com fixtures reais; cache hit reduz
+      custo ≥ 95% no 2º call medido.
+
+  - id: task-008
+    title: "Prompt Sanitizer + PII Filter + 20 red team fixtures"
+    depends_on: [task-003]
+    complexity: HIGH
+    spec_file: EXECUTION/task-008.md
+    subtask_prompt: |
+      Implemente: src/security/prompt-sanitizer.service.ts (wrapper XML
+      <comment idx="N">...</comment>, escape de < adversário),
+      src/security/pii-filter.service.ts (regex emails + telefones BR — substitui por
+      [EMAIL_REMOVIDO], [TELEFONE_REMOVIDO]), src/schemas/output.schemas.ts (validação
+      Zod da saída LLM — rejeita respostas com markers de instrução vazada).
+      Crie tests/fixtures/comments/adversarial/ com 20 prompt injections curadas
+      ("Ignore previous instructions", "</comment><system>", XSS-like, etc.).
+      Validation gate: red-team-prompt-injection.test.ts — 20/20 bloqueados;
+      pii-filter.test.ts confirma email/telefone redigidos em snapshots.
+
+  - id: task-009
+    title: "NLP Tool: analyze_video_comments"
+    depends_on: [task-008]
+    complexity: MED
+    spec_file: EXECUTION/task-009.md
+    subtask_prompt: |
+      Implemente src/services/nlp.service.ts (parte comments) e src/tools/nlp.tool.ts
+      (analyze_video_comments). Schema Zod: videoId regex 11 chars, maxComments ∈
+      [20,500]=100. Fluxo: validar → fetch commentThreads.list (paginate, 1u/page) →
+      PII filter → sanitizer → prompt FIXO (nlp-comments.prompt.ts) → Claude Haiku 4.5
+      → validar output via schema → cache 24h. Output markdown: sentiment, top 10
+      dores, top 10 perguntas, pedidos agrupados, 5 ideias, comentários âncora.
+      Audit log NLP_LLM_CALL com custo (target ≤ $0.005).
+      Validation gate: 100 comments < 15s; custo medido ≤ $0.005; zero PII em audit.
+
+  - id: task-010
+    title: "NLP Tool: analyze_video_transcript"
+    depends_on: [task-008]
+    complexity: HIGH
+    spec_file: EXECUTION/task-010.md
+    subtask_prompt: |
+      Estenda src/services/nlp.service.ts (parte transcript) e adicione tool em
+      nlp.tool.ts. Fluxo: captions.list (50u) → try linguagens preferidas em ordem
+      (pt, pt-BR, en, es) → captions.download (200u — CACHE CRÍTICO) → parser SRT/VTT
+      inline (regex) → sanitizer → Claude Sonnet 4.6 (estrutura merece profundidade) →
+      cache 7 dias. Fallback scrape de página pública se captions desabilitadas
+      (best effort, marcar no output). Output markdown: estrutura (hook 0-15s, intro,
+      payoff, CTAs com timestamps), tipos de hooks, densidade por bloco, padrões
+      retenção. Truncar análise se vídeo > 60min.
+      Validation gate: vídeo 15min < 20s; custo ≤ $0.02; cache 7d hit medido;
+      fallback scrape testado.
+
+  - id: task-011
+    title: "NLP Tool: reverse_engineer_viral_video (orquestra Camadas 2+3)"
+    depends_on: [task-007, task-009, task-010]
+    complexity: MED
+    spec_file: EXECUTION/task-011.md
+    subtask_prompt: |
+      Implemente reverse_engineer_viral_video em nlp.tool.ts. Combina (paralelamente)
+      analyzeVideoComments(videoId), analyzeVideoTranscript(videoId), e se
+      includeThumbnail (default true) analyzeThumbnailVisuals(myNiche). Sonnet 4.6
+      com prompt unificado (dados das 3 análises) → gera hipótese "por que viralizou"
+      (3-5 fatores ranqueados), "como replicar no seu nicho", template de roteiro
+      (~300 palavras), template de thumbnail (descrição + paleta). Cache 7d. Custo
+      estimado $0.04-0.08.
+      Validation gate: end-to-end < 60s; teste de integração com vídeo viral conhecido
+      retorna análise consistente.
+
+  - id: task-012
+    title: "Pipeline Tool: generate_full_script"
+    depends_on: [task-005, task-008]
+    complexity: HIGH
+    spec_file: EXECUTION/task-012.md
+    subtask_prompt: |
+      Implemente src/services/pipeline.service.ts (parte script) e src/tools/pipeline.tool.ts
+      (generate_full_script). Schema Zod: topic, niche, durationMinutes ∈ {5,10,15,20},
+      tone enum (educativo/descontraido/provocativo/tecnico), audience?, competitorVideoId?.
+      Fluxo: buscar contexto cached (analyzeRetentionSignals + analyzeTitlePatterns) →
+      se competitorVideoId invocar reverseEngineerViralVideo → Sonnet 4.6 com prompt
+      único (NÃO chunked, evita tom inconsistente) → validar qualidade (roteiro DEVE
+      referenciar ≥3 dados específicos do nicho — busca por strings). SEM cache.
+      Output markdown: Hook 3 opções (⭐ recomendada), Intro/Promessa, 3-5 seções com
+      timestamps, Pattern interrupts, CTAs em ~25%/~75%, Call-back ao hook, Outro +
+      próximo vídeo, B-rolls por seção, [CUT] em jump cuts.
+      Validation gate: < 30s; 100% outputs têm 5+ seções; validação rejeita roteiros
+      genéricos.
+
+  - id: task-013
+    title: "Pipeline Tool: optimize_video_description"
+    depends_on: [task-008]
+    complexity: MED
+    spec_file: EXECUTION/task-013.md
+    subtask_prompt: |
+      Estenda pipeline.service.ts (parte description) e pipeline.tool.ts. Schema Zod:
+      title, tags[], transcript? (gera capítulos), timestamps?. Validações pós-geração:
+      primeira frase com keyword principal (validação Claude), word count 150-200,
+      densidade keyword ≤ 3% (anti-stuffing), 3-5 hashtags. Detector de nicho regulado
+      por keywords (investimento/ação/trading → financeiro; saúde/remédio → médico;
+      jurídico/lei → jurídico) → disclaimer apropriado. CTAs estruturados, UTM tracking
+      em links. Custo ~$0.005 (Haiku).
+      Validation gate: < 15s; densidade keyword ≤ 3% validada; disclaimer regulado
+      detectado em snapshots financeiro/médico/jurídico.
+
+  - id: task-014
+    title: "Pipeline Tool: predict_video_performance"
+    depends_on: [task-007, task-012]
+    complexity: MED
+    spec_file: EXECUTION/task-014.md
+    subtask_prompt: |
+      Estenda pipeline.service.ts (parte prediction) e pipeline.tool.ts. Schema Zod:
+      title, thumbnailUrl?, niche, channelId regex /^UC[a-zA-Z0-9_-]{22}$/, publishDate?.
+      Fluxo: getChannelAnalytics (baseline views) → estimateCtrPotential (v0.1) →
+      se thumbnailUrl: scoreMyThumbnail → analyzeRetentionSignals → scoreBestPublishWindow.
+      Fórmula viral_score: ctr*0.30 + thumb*0.25 + retention*0.25 + timing*0.10 + niche_diff*0.10.
+      Output OBRIGATÓRIO disclaimer "⚠️ Estimativa heurística — não é predição ML"
+      (RF-4.29, validação automatizada). Anti-tampering: scores NUNCA são input.
+      Views 7d/30d/90d (faixa min-max + CI), CTR previsto, retenção, recomendação
+      🟢/🟡/🔴 (≥70 / 40-69 / <40), top 5 ajustes, janela ideal.
+      Validation gate: < 30s com thumb; disclaimer em 100% das saídas; teste anti-
+      tampering bloqueia injeção de score.
+
+  - id: task-015
+    title: "Pipeline Tool: run_workflow (4 workflows pré-construídos)"
+    depends_on: [task-011, task-012, task-013, task-014]
+    complexity: HIGH
+    spec_file: EXECUTION/task-015.md
+    subtask_prompt: |
+      Implemente workflow engine em pipeline.service.ts e tool run_workflow em
+      pipeline.tool.ts. Schema Zod: workflow enum (launch_new_channel, revive_dead_channel,
+      weekly_planning, competitor_takedown), params record. WORKFLOW_REGISTRY com
+      estimatedCost + estimatedMinutes + steps por workflow. Pre-flight check
+      "Estimativa: $X.XX em ~Y min". Progresso parcial salvo em cache chave
+      workflow_run_<uuid>_<step> (interruptível, recuperável). Audit log
+      WORKFLOW_STEP por step com timing. Cap WORKFLOW_DAILY_BUDGET_USD bloqueia.
+      Validation gate: 4 workflows ponta-a-ponta com mocks; weekly_planning < 3min;
+      kill no meio + retry recupera progresso parcial.
+
+  - id: task-016
+    title: "Auditoria de segurança + pin final de dependências"
+    depends_on: [task-015]
+    complexity: LOW
+    spec_file: EXECUTION/task-016.md
+    subtask_prompt: |
+      Rode pnpm audit --audit-level=high — não pode ter CVE HIGH/CRITICAL. Atualize
+      package.json fixando versões (não ranges) para: @anthropic-ai/sdk 0.32.1,
+      better-sqlite3 11.5.0, sharp 0.33.5. Adicione GitHub Action de gitleaks.
+      Atualize SECURITY.md mapeando todos os 37 RSs (RS-1.1 a RS-4.10) para tag/seção.
+      Confirme headers de segurança documentados.
+      Validation gate: pnpm audit limpo; gitleaks scan limpo no repo; SECURITY.md
+      tem todos os 37 RSs cobertos.
+
+  - id: task-017
+    title: "README + audit log estruturado + changelog v0.2.0"
+    depends_on: [task-016]
+    complexity: LOW
+    spec_file: EXECUTION/task-017.md
+    subtask_prompt: |
+      Atualize README.md com as 28 tools (tabela), custos estimados de APIs, env vars
+      novas, setup Vision/NLP, demo de cada Camada. Formalize formato do audit log
+      (já estruturado — só documentar campos canonical). Crie CHANGELOG.md entrada
+      v0.2.0 listando: 10 tools novas, 6 refatoradas, performance gains, breaking
+      changes (zero — backward compat). Documente fluxo DARE usado (link para
+      DARE/BLUEPRINT.md). Atualize smithery.yaml se necessário.
+      Validation gate: README valido (markdownlint); CHANGELOG.md segue Keep a Changelog
+      format; demo end-to-end (asciinema ou markdown).

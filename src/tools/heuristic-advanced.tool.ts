@@ -8,11 +8,13 @@ import {
 import {
   getYouTubeClient,
   searchVideos,
-  getVideoById,
+  getVideosByIdsBatched,
   getChannelStats,
 } from '../services/youtube.service.js'
 import { checkRateLimit } from '../security/rate-limiter.service.js'
 import { withAudit } from '../security/audit.service.js'
+import { recordQuota } from '../services/quota.service.js'
+import { sha256 } from '../utils/hash.js'
 
 // ─── Shared helpers ───────────────────────────────────────────────────────────
 
@@ -307,6 +309,7 @@ export async function findTrendingKeywords(rawInput: unknown, accessToken: strin
 
     const input = FindTrendingKeywordsSchema.parse(rawInput)
     const client = getYouTubeClient(accessToken)
+    const tokenHash = sha256(accessToken)
 
     const n = input.niche
     const variations = [
@@ -339,12 +342,13 @@ export async function findTrendingKeywords(rawInput: unknown, accessToken: strin
 
     // Process sequentially to avoid quota burst
     for (const kw of variations) {
+      recordQuota('youtube:search.list', tokenHash, 'find_trending_keywords')
       const results = await searchVideos(client, kw, 5, input.regionCode, 'relevance')
       const videoIds = results.map(r => r.id?.videoId).filter((id): id is string => !!id)
       if (videoIds.length === 0) continue
 
-      // Fetch video details in parallel (within single keyword)
-      const videos = (await Promise.all(videoIds.map(id => getVideoById(client, id)))).filter(Boolean)
+      // Fetch video details (batched: 1 chamada API por keyword, não N)
+      const videos = (await getVideosByIdsBatched(client, videoIds, { tokenHash, toolName: 'find_trending_keywords' })).filter(Boolean)
       if (videos.length === 0) continue
 
       const recentVideos = videos.filter(v => {
@@ -627,6 +631,7 @@ export async function generateContentCalendar(rawInput: unknown, accessToken: st
 
     const input = GenerateContentCalendarSchema.parse(rawInput)
     const client = getYouTubeClient(accessToken)
+    const tokenHash = sha256(accessToken)
 
     const n = input.niche
     const now = Date.now()
@@ -650,13 +655,14 @@ export async function generateContentCalendar(rawInput: unknown, accessToken: st
     const topicEntries: TopicEntry[] = []
 
     for (const sub of subtopics) {
+      recordQuota('youtube:search.list', tokenHash, 'generate_content_calendar')
       const results = await searchVideos(client, sub, 5, input.regionCode, 'relevance')
       const videoIds = results.map(r => r.id?.videoId).filter((id): id is string => !!id)
       if (videoIds.length === 0) {
         topicEntries.push({ topic: sub, priority: 3, avgViews: 0 })
         continue
       }
-      const videos = (await Promise.all(videoIds.map(id => getVideoById(client, id)))).filter(Boolean)
+      const videos = (await getVideosByIdsBatched(client, videoIds, { tokenHash, toolName: 'generate_content_calendar' })).filter(Boolean)
       const viewsList = videos.map(v => parseInt(v?.statistics?.viewCount ?? '0', 10))
       const avgViews = viewsList.length > 0
         ? viewsList.reduce((a, b) => a + b, 0) / viewsList.length
@@ -695,11 +701,12 @@ export async function generateContentCalendar(rawInput: unknown, accessToken: st
       // skip if already in subtopics (avoid duplicates)
       if (topicEntries.some(e => e.topic === kw)) continue
 
+      recordQuota('youtube:search.list', tokenHash, 'generate_content_calendar')
       const results = await searchVideos(client, kw, 5, input.regionCode, 'relevance')
       const videoIds = results.map(r => r.id?.videoId).filter((id): id is string => !!id)
       if (videoIds.length === 0) continue
 
-      const videos = (await Promise.all(videoIds.map(id => getVideoById(client, id)))).filter(Boolean)
+      const videos = (await getVideosByIdsBatched(client, videoIds, { tokenHash, toolName: 'generate_content_calendar' })).filter(Boolean)
       const recentCount = videos.filter(v => {
         const pub = new Date(v?.snippet?.publishedAt ?? 0).getTime()
         return (now - pub) / 86_400_000 < RECENT_DAYS

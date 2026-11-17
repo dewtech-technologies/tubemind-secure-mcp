@@ -1,8 +1,8 @@
 {
   "name": "tubemind-secure-mcp",
   "mcpName": "io.github.dewtech-technologies/tubemind-secure-mcp",
-  "version": "0.1.3",
-  "description": "Secure Model Context Protocol server for YouTube intelligence — 18 tools (search, analytics, benchmark, heuristics, competitor research) powered by YouTube Data API v3 + Analytics API, OAuth2 (Brand Account support), AES-256-GCM token encryption, OWASP Top 10 controls.",
+  "version": "0.2.0",
+  "description": "Secure Model Context Protocol server for YouTube intelligence — 28 tools (search, analytics, benchmark, heuristics, competitor, vision, NLP, pipeline) powered by YouTube Data API v3 + Analytics API + Claude Vision/Sonnet, OAuth2 (Brand Account support), AES-256-GCM token encryption, OWASP Top 10 controls, SQLite cache.",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
@@ -52,18 +52,22 @@
     "dev": "tsx watch src/index.ts",
     "start": "node dist/index.js",
     "typecheck": "tsc --noEmit",
-    "test": "vitest --passWithNoTests",
+    "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "audit:security": "pnpm audit --audit-level=high",
     "auth": "tsx --env-file=.env src/auth-server.ts",
     "lint": "eslint src --ext .ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "0.32.1",
     "@modelcontextprotocol/sdk": "1.26.0",
+    "better-sqlite3": "11.5.0",
     "googleapis": "171.4.0",
+    "sharp": "0.33.5",
     "zod": "3.25.28"
   },
   "devDependencies": {
+    "@types/better-sqlite3": "7.6.11",
     "@types/node": "22.15.17",
     "@typescript-eslint/eslint-plugin": "8.59.2",
     "@typescript-eslint/parser": "8.59.2",
@@ -81,7 +85,8 @@
   "pnpm": {
     "overrides": {
       "esbuild": ">=0.25.0",
-      "vite": ">=6.4.2"
+      "vite": ">=6.4.2",
+      "fast-uri": ">=3.1.2"
     }
   },
   "packageManager": "pnpm@9.15.4+sha512.b2dc20e2fc72b3e18848459b37359a32064663e5627a51e4c74b2c29dd8e8e0491483c3abb40789cfd578bf362fb6ba8261b05f0387d76792ed6e23ea3b1b6a0"

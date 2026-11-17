@@ -74,12 +74,47 @@ import {
   detectContentGaps,
 } from './tools/heuristic.tool.js'
 
+// v0.2 — Tools Camada 1 (Quota tracking)
+import { getQuotaUsageDefinition, getQuotaUsage } from './tools/quota.tool.js'
+
+// v0.2 — Tools Camada 2 (Vision)
+import {
+  analyzeThumbnailVisualsDefinition,
+  analyzeThumbnailVisuals,
+  scoreMyThumbnailDefinition,
+  scoreMyThumbnail,
+} from './tools/vision.tool.js'
+
+// v0.2 — Tools Camada 3 (NLP)
+import {
+  analyzeVideoCommentsDefinition,
+  analyzeVideoComments,
+  analyzeVideoTranscriptDefinition,
+  analyzeVideoTranscript,
+  reverseEngineerViralVideoDefinition,
+  reverseEngineerViralVideoHandler,
+} from './tools/nlp.tool.js'
+
+// v0.2 — Tools Camada 4 (Pipeline)
+import {
+  generateFullScriptDefinition,
+  generateFullScript,
+  optimizeVideoDescriptionDefinition,
+  optimizeVideoDescription,
+  predictVideoPerformanceDefinition,
+  predictVideoPerformanceHandler,
+  runWorkflowDefinition,
+  runWorkflow,
+} from './tools/pipeline.tool.js'
+
 // ─── Server ───────────────────────────────────────────────────────────────────
+
+const VERSION = '0.2.0'
 
 const server = new Server(
   {
     name: 'tubemind-secure-mcp',
-    version: '0.1.0',
+    version: VERSION,
   },
   {
     capabilities: { tools: {} },
@@ -108,6 +143,20 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
     findTrendingKeywordsDefinition,
     analyzeRetentionSignalsDefinition,
     generateContentCalendarDefinition,
+    // v0.2 Camada 1
+    getQuotaUsageDefinition,
+    // v0.2 Camada 2
+    analyzeThumbnailVisualsDefinition,
+    scoreMyThumbnailDefinition,
+    // v0.2 Camada 3
+    analyzeVideoCommentsDefinition,
+    analyzeVideoTranscriptDefinition,
+    reverseEngineerViralVideoDefinition,
+    // v0.2 Camada 4
+    generateFullScriptDefinition,
+    optimizeVideoDescriptionDefinition,
+    predictVideoPerformanceDefinition,
+    runWorkflowDefinition,
   ],
 }))
 
@@ -189,6 +238,40 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       case 'generate_content_calendar':
         result = await generateContentCalendar(args, accessToken)
         break
+      // v0.2 Camada 1
+      case 'get_quota_usage':
+        result = await getQuotaUsage(args, accessToken)
+        break
+      // v0.2 Camada 2
+      case 'analyze_thumbnail_visuals':
+        result = await analyzeThumbnailVisuals(args, accessToken)
+        break
+      case 'score_my_thumbnail':
+        result = await scoreMyThumbnail(args, accessToken)
+        break
+      // v0.2 Camada 3
+      case 'analyze_video_comments':
+        result = await analyzeVideoComments(args, accessToken)
+        break
+      case 'analyze_video_transcript':
+        result = await analyzeVideoTranscript(args, accessToken)
+        break
+      case 'reverse_engineer_viral_video':
+        result = await reverseEngineerViralVideoHandler(args, accessToken)
+        break
+      // v0.2 Camada 4
+      case 'generate_full_script':
+        result = await generateFullScript(args, accessToken)
+        break
+      case 'optimize_video_description':
+        result = await optimizeVideoDescription(args, accessToken)
+        break
+      case 'predict_video_performance':
+        result = await predictVideoPerformanceHandler(args, accessToken)
+        break
+      case 'run_workflow':
+        result = await runWorkflow(args, accessToken)
+        break
       default:
         return {
           content: [{ type: 'text', text: `❌ Tool desconhecida: "${name}"` }],
@@ -231,7 +314,12 @@ async function main() {
   const transport = new StdioServerTransport()
   await server.connect(transport)
   // Log vai para stderr para não poluir o protocolo MCP (stdout)
-  console.error('🧠 tubemind-secure-mcp iniciado')
+  const cacheEnabled = process.env['TUBEMIND_CACHE_ENABLED'] !== 'false'
+  const llmAvailable = !!process.env['ANTHROPIC_API_KEY']
+  console.error(
+    `🧠 tubemind-secure-mcp v${VERSION} iniciado (stdio mode) — ` +
+    `cache=${cacheEnabled ? 'on' : 'off'}, llm=${llmAvailable ? 'on' : 'off'}`,
+  )
 }
 
 main().catch((err) => {
